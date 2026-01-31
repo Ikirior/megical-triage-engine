@@ -1,0 +1,40 @@
+services:
+  frontend_server:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/:/src/
+    networks:
+      - server_net
+    ports:
+      - "3000:3000"
+  backend_server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    networks:
+      - db_net
+      - server_net
+    volumes:
+      - ./backend/:/src/
+    ports:
+      - "3001:3001"
+  db:
+    image: mongo
+    restart: always
+    networks:
+      - db_net
+    volumes:
+      - db_megical:/src/
+    env_file:
+      - .env.db
+
+networks:
+  db_net:
+    driver: bridge
+  server_net:
+    driver: bridge
+
+volumes:
+  db_megical:
