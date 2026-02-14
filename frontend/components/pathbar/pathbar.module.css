@@ -1,0 +1,11 @@
+.pathbar
+{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 10px;
+    height: 4vh;
+    font-size: 0.75em;
+    background-color: #34567C;
+    color: white;
+}

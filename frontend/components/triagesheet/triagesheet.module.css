@@ -1,0 +1,43 @@
+.sheet
+{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    align-content: start;
+
+    --height: 125vh;
+    width: calc(var(--height)*0.7);
+    height: var(--height); /* A4 sheet propottions: 1102 (w) /1560 (h) = 0.70641025641 */
+    background-color: white;
+    box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.342);
+    margin-bottom: 2vh;
+}
+
+.topic
+{
+    background-color: #D9D9D9;
+    display: flex;
+    width: 100%;
+    height: fit-content;
+    justify-content: center;
+    font-weight: 600;
+    font-size: large;
+    padding: 4px;
+    border-width: 1 0 1 0;
+}
+
+.field
+{
+    display: grid;
+    grid-template-columns: 20% 80%;
+    width: 50%;
+    height: fit-content;
+}
+.field > *
+{
+    border: solid thin black;
+    width: 100%;
+    text-align: center;
+    margin: auto;
+}
