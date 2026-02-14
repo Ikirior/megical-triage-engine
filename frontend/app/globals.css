@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+
+  /* Theme 1 */
+  /*
+  --background: #EEF2EF;
   --foreground: #171717;
+  --shadow: #4E6474;
+  --midtone: #4873A3;
+  --highlight: #B7EDE2;
+  --accent: #B3FF98;
+  */
+
+  /* Theme 2 */
+  /**/
+  --background: #EEF2EF;
+  --foreground: #171717;
+  --shadow: #3775B9;
+  --midtone: #5C99DE;
+  --highlight: #BDDCFF;
+  --accent: #FFFB78;
+  --accent-hover: #fffc9f;
 }
 
 @theme inline {
@@ -12,15 +30,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html{
+  height: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+/*https://stackoverflow.com/questions/38428322/react-component-full-screen-with-height-100*/
+#root
+{
+  height: 100%;
 }
