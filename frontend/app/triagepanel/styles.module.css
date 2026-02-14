@@ -1,0 +1,31 @@
+.panel
+{
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 1vh;
+
+}
+
+.actions
+{
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+    padding: 0 2vw;
+}
+
+.form_actions
+{
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+}
+
+.plus_button
+{
+    position: fixed;
+    right: 20px;
+}
