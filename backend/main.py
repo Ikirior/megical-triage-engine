@@ -1,3 +1,20 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from routers import users, patients, triages, doctors
+from database import init_db
 
-app = FastAPI(title="MedGemma API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan, title="MedGemma API")
+
+app.include_router(users.router)
+app.include_router(patients.router)
+app.include_router(triages.router)
+app.include_router(doctors.router)
+
+app.get("/")
+def root():
+    return {"message": "Hello World!"}
