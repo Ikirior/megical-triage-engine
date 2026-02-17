@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import List, Optional, Literal
 from beanie import PydanticObjectId
 
@@ -50,6 +50,29 @@ class UserResponse(UserBase):
     id: PydanticObjectId
     created_at: datetime
 
+class PatientCreate(BaseModel):
+    name: str
+    cpf: str
+    rg: str
+    birth_date: date
+    address: str
+    companion: bool
+    race: RaceEnum
+    sex: SexEnum
+    phone_num: str
+
+class PatientUpdate(BaseModel):
+    address: Optional[str] = None
+    companion: Optional[bool] = None
+    phone_num: Optional[str] = None
+    sex: Optional[SexEnum] = None
+
+class PatientHistoryItem(BaseModel):
+    patient_id: PydanticObjectId
+    created_at: datetime
+    triage_data: Optional[TriageData] = None
+    doctor_data: Optional[DoctorData] = None
+
 class Vitals(BaseModel):
     systolic_bp: int = Field(..., description = "Pressão Sistólica (ex: 120)")
     diastolic_bp: int = Field(..., description = "Pressão Diastólica (ex: 80)")
@@ -59,7 +82,7 @@ class Vitals(BaseModel):
     extras: Optional[dict] = None
 
 class TriageInvestigationQA(BaseModel):
-    question_id: str
+    question_id: PydanticObjectId
     question_text: str
     ai_reasoning: str
     patient_answer: Optional[str] = None
@@ -81,22 +104,11 @@ class TriageDataPhaseThree(BaseModel):
     risk_classification: Optional[Literal["azul", "verde", "amarelo", "laranja", "vermelho"]] = None
     final_nurse_notes: Optional[str] = None
 
-class PatientCreate(BaseModel):
-    name: str
-    cpf: str
-    rg: str
-    birth_date: datetime
-    address: str
-    companion: bool
-    race: RaceEnum
-    sex: SexEnum
-    phone_num: str
-
-class PatientUpdate(BaseModel):
-    address: Optional[str] = None
-    companion: Optional[bool] = None
-    phone_num: Optional[str] = None
-    sex: Optional[SexEnum] = None
+class TriageQueueItem(BaseModel):
+    sheet_id: PydanticObjectId
+    patient_id: PydanticObjectId
+    patient_name: str
+    arrival_time: datetime
 
 class DoctorQueueItem(BaseModel):
     id: PydanticObjectId
@@ -121,6 +133,27 @@ class TriageData(BaseModel):
 
 class DoctorData(BaseModel):
     ai_pre_consultation_summary: Optional[str] = None
-    doctor_notes: str
+    doctor_notes:str
     diagnosis_cid: Optional[str] = None
     prescription: Optional[str] = None
+
+class DoctorQueueItem(BaseModel):
+    id: PydanticObjectId
+    patient_name: str
+    risk_classification: Literal["azul", "verde", "amarelo", "laranja", "vermelho"]
+    waiting_time_minutes: int
+
+class ServiceSheetResponse(BaseModel):
+    id : PydanticObjectId
+    patient_ref: PydanticObjectId
+    receptionist_ref: PydanticObjectId
+    status: TriageStatus = TriageStatus.aguardando_triagem
+    created_at: datetime
+
+class ServiceSheetDetail(BaseModel):
+    id: PydanticObjectId
+    patient: PatientCreate
+    status: TriageStatus
+    created_at: datetime
+    triage_data: Optional[TriageData] = None
+    doctor_data: Optional[DoctorData] = None
