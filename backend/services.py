@@ -1,5 +1,7 @@
 from datetime import datetime
-
+import asyncio
+from beanie.operators import Or
+from fastapi import HTTPException
 from models import User, Patient, ServiceSheet
 from contracts import (UserCreate, UserResponse, UserUpdate, PatientCreate,
                        PatientUpdate, TriageDataPhaseOne, TriageDataPhaseTwo,
@@ -34,6 +36,24 @@ class UserService:
     TODO 6: delete_user(user_id: str) -> bool
         - Se um funcionário for demitido, o Admin tem que remover o acesso.
     """
+    async def create_user(user_data: UserCreate) -> UserResponse:
+        
+        find_exist_user = await User.find_one(Or(user_data.email == UserCreate.email, user_data.cpf == UserCreate.cpf))
+        
+        if find_exist_user:
+            raise HTTPException(status_code=400, detail="Usuário já cadastrado.")
+        
+        password_hash = AuthService.get_password_hash(user_data.password)
+            
+        new_user = User(
+            **user_data.model_dump(exclude={"password"}),
+            password_hash=password_hash
+        )
+        
+        await new_user.insert()
+        
+        return UserResponse(**new_user.model_dump())
+    pass
 
 class PatientService:
     """
@@ -48,10 +68,10 @@ class PatientService:
         - Cria o registro demográfico no banco.
         - Valida duplicidade de CPF (caso a busca anterior falhe).
     
-    TODO 3: update_patient(patient_id: str, data: PatientUpdate) -> Patient
+    TODO 3: update_patient(patient_id: PydanticObjectId, data: PatientUpdate) -> Patient
         - Caso o paciente mudou de endereço ou telefone.
     
-    TODO 4: get_patient_history_context(patient_id: str) -> List[ServiceSheet]
+    TODO 4: _get_patient_history_context(patient_id: str) -> List[PatientHistoryItem]
         - A memória do MedGemma sobre o paciente.
         - Busca no banco 'ServiceSheets' onde status="finalizado" E patient_ref=patient_id.
         - Ordena por data (decrescente).
@@ -76,10 +96,12 @@ class TriageService:
     - PatientService
     - MedGemmaProvider
     
-    TODO 1: get_active_triages(patient_id: str) -> List[ServiceSheet]
-        - Busca no banco ServiceSheets onde patient_ref == patient_id.
-        - Filtra apenas aquelas onde status != "finalizado" (ou seja, triagens em aberto ou atendimentos correndo).
-        - Usado para o enfermeiro selecionar qual ficha continuar.
+    TODO 1: get_triage_queue() -> List[TriageQueueItem]
+        - Busca no banco ServiceSheets onde status == "aguardando_triagem".
+        - IMPORTANTE: Não trazer status "em_triagem" ou "finalizado".
+        - Deve usar fetch_links=True para acessar o nome do paciente (ServiceSheet.patient_ref.name).
+        - Ordena por created_at - Quem chegou primeiro é atendido primeiro (First In - First Out
+        - Retorna uma lista simplificada apenas para exibição no painel.
 
     TODO 2: _calculate_unit_context() -> UnityContextSnapshot
         - Método interno.
@@ -87,27 +109,37 @@ class TriageService:
         - Se count < 10: "low", < 20: "medium", etc.
         - Retorna o objeto UnityContextSnapshot com o timestamp atual.
     
-    TODO 3: execute_phase_one(sheet_id: str, input_data: TriageDataPhaseOne) -> List[TriageInvestigationQA]
+    TODO 3: start_triage(sheet_id: PydanticObjectId, nurse_id: PydanticObjectId) -> ServiceSheetDetail
+        - Quando o enfermeiro clica no card da fila.
+        - Verifica se a ficha existe e está livre
+        - Muda status de "aguardando_triagem" para "em_triagem".
+        - Vincula o nurse_ref - Isso impede que outro enfermeiro pegue o mesmo paciente.
+        - Salva no Banco
+        - Retorna o objeto ServiceSheetDetail populado
+    
+    TODO 4: execute_phase_one(sheet_id: PydanticObjectId, input_data: TriageDataPhaseOne) -> List[TriageInvestigationQA]
         - Busca a ServiceSheet pelo ID.
         - Salva Vitals e Observações Iniciais no 'triage_data'.
-        - Chama PatientService.get_patient_history_context() para pegar o histórico.
-        - Chama _calculate_unit_context() para pegar a lotação.
-        - Chama MedGemmaProvider.orchestrate_investigation(vitals, history, unit_context).
+        - Chama PatientService._get_patient_history_context() para pegar o histórico.
+        - Chama _calculate_unit_context() para pegar o contexto da unidade (lotação).
+        - Chama MedGemmaProvider.orchestrate_investigation(input_data, history, unit_context).
         - Salva as perguntas geradas no banco.
-        - Retorna as perguntas para o Frontend.
+        - Retorna List[TriageInvestigationQA] para o Frontend.
     
-    TODO 4: execute_phase_two(sheet_id: str, input_data: TriageDataPhaseTwo) -> str
+    TODO 5: execute_phase_two(sheet_id: PydanticObjectId, input_data: TriageDataPhaseTwo) -> str
         - Busca a ServiceSheet.
         - Salva as respostas (investigation_qa) enviadas pelo enfermeiro.
-        - Chama MedGemmaProvider.generate_medical_suggestion(contexto_completo).
-        - Salva a sugestão (ai_generated_suggestion) no banco.
+        - Recupera as informações de Vitals + Observações
+        - Chama PatientService._get_patient_history_context() para pegar o histórico.
+        - Chama _calculate_unit_context() para pegar o contexto da unidade (lotação).
+        - Chama MedGemmaProvider.generate_medical_suggestion(triage_data, history_context, unit_context). No contexto completo
+        - Salva a sugestão ai_generated_suggestion no banco.
         - Retorna a string da sugestão.
     
-    TODO 5: execute_phase_three(sheet_id: str, input_data: TriageDataPhaseThree) -> bool
+    TODO 6: execute_phase_three(sheet_id: PydanticObjectId, input_data: TriageDataPhaseThree) -> bool
         - Busca a ServiceSheet.
         - Salva a classificação de risco e notas finais do enfermeiro.
         - Atualiza status para "aguardando_medico".
-        - Define nurse_ref com o ID do enfermeiro logado.
         - (Opcional/Async) Dispara MedGemmaProvider.generate_doctor_summary().
         - Retorna True (Sucesso).
     """
@@ -124,12 +156,12 @@ class DoctorService:
             2. Desempate: Quem chegou primeiro (created_at ou updated_at mais antigo).
         - Retorna a lista ordenada para o médico chamar o próximo.
 
-    TODO 2: get_consultation_details(sheet_id: str) -> ServiceSheet
+    TODO 2: start_consultation(sheet_id: PydanticObjectId, doctor_id: PydanticObjectId) -> ServiceSheetDetail
         - Quando o médico clica em um paciente da fila.
         - Retorna a ficha completa (com vitais, histórico, resumo da IA pré-consulta).
         - (Opcional) Pode mudar o status para "em_atendimento" aqui se quiser travar o paciente para outros médicos não chamarem.
 
-    TODO 3: finish_consultation(sheet_id: str, doctor_input: DoctorData, doctor_id: str) -> ServiceSheet
+    TODO 3: finish_consultation(sheet_id: PydanticObjectId, input_data: DoctorData: PydanticObjectId) -> ServiceSheetDetail
         - Recebe o input do médico (Diagnóstico, Prescrição, Notas).
         - Atualiza 'doctor_data' na ServiceSheet.
         - Define 'doctor_ref' = doctor_id.
@@ -142,9 +174,11 @@ class MedGemmaProvider:
     """
     Encapsula o Agente MedGemma e atua como um provedor de sugestões.
     
-    TODO 1: orchestrate_investigation(vitals: Vitals, obs: str, history: List[ServiceSheet], unit_context: UnityContextSnapshot) -> List[TriageInvestigationQA]
+    TODO 1: orchestrate_investigation(actual_triage: TriageDataPhaseOne) -> List[TriageInvestigationQA]
         - MÉTODO PÚBLICO (Usado na Fase 1).
         - Atua como o decisor.
+        - Gera o histórico do paciente List[TriageQueueItem] chamando _get_patient_history_context()
+        - Gera o status atual da unidade de saúde UnityContextSnapshot chamando _calculate_unit_context()
         - Passo 1: Chama _decide_investigation_need().
         - Se a decisão for não perguntar: Retorna lista vazia [].
         - Se a decisão for perguntar: Chama _generate_questions() passando a quantidade decidida.
@@ -181,12 +215,12 @@ class AuthService:
     Dependências:
     - UserService (para buscar o usuário no banco pelo email)
     
-    TODO 1: get_password_hash(password: str) -> str
+    TODO 1: _get_password_hash(password: str) -> str
         - Função utilitária de Hash.
         - Recebe a senha crua ("123456") e retorna o hash ("$2b$12$...").
         - Usada pelo UserService.create_user().
     
-    TODO 2: verify_password(plain_password: str, hashed_password: str) -> bool
+    TODO 2: _verify_password(plain_password: str, hashed_password: str) -> bool
         - Função utilitária de Verificação.
         - Compara a senha crua enviada no login com o hash salvo no banco.
         - Retorna True/False.
@@ -210,4 +244,7 @@ class AuthService:
         - Usado pelas Dependências de Rota para saber se o usuário está logado.
         - Retorna os dados do usuário em um payload ou lança erro se o token estiver expirado/inválido.
     """
+    
+    def get_password_hash(password: str) -> str:
+        pass
     pass
