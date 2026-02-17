@@ -2,7 +2,7 @@ import TriageSheet from "@/components/triagesheet/triagesheet";
 import style from '@/app/triagepanel/styles.module.css'
 import PathBar from "@/components/pathbar/pathbar";
 import MajorButton from "@/components/majorbutton/majorbutton";
-import { Send, Rocket, PlusIcon } from "lucide-react";
+import { Send, Rocket, PlusIcon, MessageCircleQuestionIcon } from "lucide-react";
 import SingleButton from "@/components/singlebutton/singlebutton";
 
 export default function Page() {
@@ -13,6 +13,7 @@ export default function Page() {
         <TriageSheet></TriageSheet>
     </div>
     <nav id="form-actions" className={[style.actions, style.form_actions].join(' ')}>
+      <MajorButton icon={<MessageCircleQuestionIcon/>} content="Generate Questions" ></MajorButton>
       <MajorButton icon={<Rocket/>} content="Generate Analysis" ></MajorButton>
       <MajorButton icon={<Send/>} content="Send to Queue" ></MajorButton>
 
