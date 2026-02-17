@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from datetime import datetime
-from typing import List, Optional, Literal
-from beanie import Document, PydanticObjectId
+from typing import Optional
+from beanie import Document, Link
+from pymongo import IndexModel, ASCENDING
 
 from contracts import UserBase, PatientCreate, TriageStatus, TriageData, DoctorData
 
@@ -11,20 +12,26 @@ class User(Document, UserBase):
     
     class Settings:
         name = "users"
+        indexes = [
+            IndexModel([("email", ASCENDING)], unique = True),
+            IndexModel([("cpf", ASCENDING)], unique = True)
+        ]
 
-# Used for Patient register
 class Patient(Document, PatientCreate):
-    medical_history_summary: Optional[str] = None
     
     class Settings:
         name = "patients"
+        
+        indexes = [
+            IndexModel([("cpf", ASCENDING)], unique = True)
+        ]
 
 class ServiceSheet(Document):
-    patient_ref: PydanticObjectId
-    receptionist_ref: PydanticObjectId
+    patient_ref: Link[Patient]
+    receptionist_ref: Link[User]
     status: TriageStatus = TriageStatus.aguardando_triagem
-    nurse_ref: Optional[PydanticObjectId] = None
-    doctor_ref: Optional[PydanticObjectId] = None
+    nurse_ref: Optional[Link[User]] = None
+    doctor_ref: Optional[Link[User]] = None
     
     created_at: datetime = Field(default_factory = datetime.now)
     updated_at: datetime = Field(default_factory = datetime.now)
@@ -34,3 +41,19 @@ class ServiceSheet(Document):
     
     class Settings:
         name = "service_sheets"
+        
+        indexes = [
+            IndexModel([("patient_ref", ASCENDING)]),
+            IndexModel([("nurse_ref", ASCENDING)]),
+            IndexModel([("doctor_ref", ASCENDING)]),
+            # Index para filtragem por status e updated_at
+            IndexModel([
+                ("status", ASCENDING), 
+                ("updated_at", ASCENDING)
+            ]),
+            # Index para filtrar por cor de risco e consulta na fila
+            IndexModel([
+                ("status", ASCENDING),
+                ("triage_data.risk_classification", ASCENDING)
+            ])
+        ]
