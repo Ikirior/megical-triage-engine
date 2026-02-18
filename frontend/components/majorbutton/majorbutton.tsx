@@ -1,4 +1,3 @@
-import { colors } from "@/utils"
 import styles from "@/components/majorbutton/majorbutton.module.css"
 
 type majorbutton_params = {
