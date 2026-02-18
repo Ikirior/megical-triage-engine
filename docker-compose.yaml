@@ -20,13 +20,19 @@ services:
       - ./backend/:/src/
     ports:
       - "3001:3001"
+    environment:
+      - PYTHONPATH=${PYTHONPATH}:/src/
+    env_file:
+      - .env.back
   db:
-    image: mongo
+    image: mongo:4.4
     restart: always
     networks:
       - db_net
     volumes:
       - db_megical:/src/
+    ports:
+      - "127.0.0.1:27017:27017"
     env_file:
       - .env.db
 
