@@ -35,14 +35,14 @@ export default function UserSection(params: usersection_params)
                 {
                     !params.newUser && 
                     <>
-                        <SingleButton icon={<Trash2Icon/>} backgroudColor="#ff5145" submit={true} formAction={DeleteUser}/>
-                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={UpdateUser}/>
+                        <SingleButton icon={<Trash2Icon/>} backgroudColor="#ff5145" submit={true} formAction={DeleteUser} title="delete user"/>
+                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={UpdateUser} title="update user"/>
                     </>
                 }
                 {
                     params.newUser && 
                     <>
-                        <SingleButton icon={<UserPlus2Icon/>} text='Save User' backgroudColor="#dcff5e" submit={true} formAction={AddUser}/>
+                        <SingleButton icon={<UserPlus2Icon/>} text='Save User' backgroudColor="#dcff5e" submit={true} formAction={AddUser} title="save new user"/>
                     </>
                 }
             </div>
