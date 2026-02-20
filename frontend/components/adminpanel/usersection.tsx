@@ -27,7 +27,7 @@ export default function UserSection(params: usersection_params)
                     <input type="email" name="email" id={node_id+'email'} defaultValue={params.cell?.email} placeholder="example@example.com"/>
                     <input type="text" name="specialization" id={node_id+'specialization'} defaultValue={params.cell?.specialization} placeholder="Dermatology"/>
                     <input type="text" name="role" id={node_id+'role'} value={params.role ?? params.cell?.role} readOnly placeholder="---"/>
-                    <input type="text" name="created_at" id={node_id+'created_at'} value={params.cell?.created_at} placeholder="---" readOnly/>
+                    <input type="text" name="created_at" id={node_id+'created_at'} value={params.cell?.created_at && new Date(params.cell?.created_at).toString()} placeholder="---" readOnly/>
                     
             </div>
             <div className={styles.sectionbuttons}>
