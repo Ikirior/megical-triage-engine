@@ -9,7 +9,7 @@ export default async function AddUser(params: FormData) {
         "rg": params.get('rg'),
         "role": params.get('role'),
         "specialization": params.get('specialization'),
-        "password": "string"
+        "password": params.get('password')
     }
 
     const addReq = await fetch(`http://backend_server:3001/users/${params.get('id')}`, {
