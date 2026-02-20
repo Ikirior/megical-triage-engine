@@ -21,6 +21,7 @@ class TriageStatus(str, Enum):
     aguardando_triagem = "aguardando_triagem"
     em_triagem = "em_triagem"
     aguardando_medico = "aguardando_medico"
+    em_atendimento = "em_atendimento"
     finalizado = "finalizado"
 
 class UserBase(BaseModel):
@@ -31,7 +32,6 @@ class UserBase(BaseModel):
     role: Literal["receptionist", "nurse", "doctor", "admin"]
     specialization: Optional[str] = None
 
-# Substitui as classes BasicWorkerSchema e SpecializedWorkerSchema
 class UserCreate(UserBase):
     password: str
 
@@ -39,7 +39,7 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     role: Optional[str] = None
@@ -89,8 +89,7 @@ class TriageInvestigationQA(BaseModel):
 
 class UnityContextSnapshot(BaseModel):
     captured_at: datetime
-    # Removido o available_resources
-    crowding_level: Literal["low", "medium", "high", "critial"]
+    crowding_level: Literal["low", "medium", "high", "critical"]
 
 class TriageDataPhaseOne(BaseModel):
     vitals: Vitals
@@ -114,19 +113,17 @@ class DoctorQueueItem(BaseModel):
     id: PydanticObjectId
     patient_name: str
     risk_classification: Literal["azul", "verde", "amarelo", "laranja", "vermelho"]
-    waiting_time_minutes: int
     waiting_since: datetime
 
 class TriageData(BaseModel):
-    # Fase 1
+    # Phase 1
     vitals: Vitals
     nurse_initial_observations: str
     
-    # Fase 2
-    unit_snapshot: Optional[UnityContextSnapshot] = None
+    # Phase 2
     investigation_qa: List[TriageInvestigationQA] = []
     
-    # Fase 3
+    # Phase 3
     ai_generated_sugestion: Optional[str] = None
     risk_classification: Optional[Literal["azul", "verde", "amarelo", "laranja", "vermelho"]] = None
     final_nurse_notes: Optional[str] = None
@@ -136,12 +133,6 @@ class DoctorData(BaseModel):
     doctor_notes:str
     diagnosis_cid: Optional[str] = None
     prescription: Optional[str] = None
-
-class DoctorQueueItem(BaseModel):
-    id: PydanticObjectId
-    patient_name: str
-    risk_classification: Literal["azul", "verde", "amarelo", "laranja", "vermelho"]
-    waiting_time_minutes: int
 
 class ServiceSheetResponse(BaseModel):
     id : PydanticObjectId
@@ -157,3 +148,7 @@ class ServiceSheetDetail(BaseModel):
     created_at: datetime
     triage_data: Optional[TriageData] = None
     doctor_data: Optional[DoctorData] = None
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
