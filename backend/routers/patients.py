@@ -1,62 +1,130 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from http import HTTPStatus
 from typing import Optional
 from datetime import datetime, date
 from beanie import PydanticObjectId
 
 from contracts import PatientCreate, PatientUpdate, RaceEnum, SexEnum, ServiceSheetResponse
-from models import Patient, ServiceSheet
+from models import Patient, ServiceSheet, User
+from dependencies import get_current_receptionist_user
+from services.patients import PatientService
+from exceptions import PatientNotFoundError, ReceptionistNotFoundError, DuplicatePatientError
 
 router = APIRouter(prefix="/patients", tags=["patient_management"])
 
-@router.get("/", response_model = Optional[Patient])
-async def get_patient(cpf: str):
+@router.get("/{cpf}", response_model = Optional[Patient])
+async def get_patient(cpf: str, current_receptionist: User = Depends(get_current_receptionist_user)):
+    """
+    Retrieves a patient's demographic record by their unique CPF.
+
+    Args:
+        cpf: The unique brazilian identification string of the target patient.
+        current_receptionist: The authenticated receptionist, injected by dependency.
+
+    Returns:
+        The requested Patient document object.
+
+    Raises:
+        HTTPException: If the patient CPF does not exist in the database (HTTP 404).
+    """
     
-    patient_mock = Patient(id=PydanticObjectId(),
-                        name="Gabriel Lacerda",
-                        cpf=cpf,
-                        rg="12.345.678-9",
-                        birth_date= date.today(),
-                        address="Casa do Mock",
-                        companion= False,
-                        race= RaceEnum.ignorado,
-                        sex=SexEnum.masculino,
-                        phone_num="1234-5678",
-                        medical_history_summary= None)
+    try:
+        patient = await PatientService.get_patient_by_cpf(cpf)
+        return patient
+
+    except PatientNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect patient CPF or patient does not exist in the database."
+        )
     
-    return None if cpf != "123.456.789-00" else patient_mock
+
 
 @router.post("/", response_model = Patient, status_code= HTTPStatus.CREATED)
-async def create_patient(patient_data: PatientCreate):
+async def create_patient(patient_data: PatientCreate, current_receptionist: User = Depends(get_current_receptionist_user)):
+    """
+    Registers a new patient in the system demographics.
+
+    Args:
+        patient_data: A PatientCreate schema containing the initial demographic data.
+        current_receptionist: The authenticated receptionist, injected by dependency.
+
+    Returns:
+        The newly created Patient document object.
+
+    Raises:
+        HTTPException: If a patient with the provided CPF already exists (HTTP 409).
+    """
     
-    return Patient(id= PydanticObjectId(),
-                   **patient_data.model_dump())
+    try:
+        new_patient = await PatientService.create_patient(patient_data)
+        return new_patient
+    
+    except DuplicatePatientError:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Patient with this CPF already exists."
+        )
 
 @router.put("/{patient_id}", response_model = Patient)
-async def update_patient(patient_id: PydanticObjectId, patient_data: PatientUpdate):
-    
-    pid = PydanticObjectId(patient_id) if PydanticObjectId.is_valid(patient_id) else PydanticObjectId()
-    
-    return Patient( id=pid,
-                    name="Gabriel Lacerda",
-                    cpf="123.456.789.00",
-                    rg="12.345.678-9",
-                    birth_date= date.today(),
-                    address= patient_data.address or "Endereço Original",
-                    companion= patient_data.companion if patient_data.companion is not None else False,
-                    race = RaceEnum.ignorado,
-                    sex= patient_data.sex or SexEnum.masculino,
-                    phone_num= patient_data.phone_num or "22999999999",
-                    medical_history_summary= None)
+async def update_patient(patient_id: PydanticObjectId, patient_data: PatientUpdate, current_receptionist: User = Depends(get_current_receptionist_user)):
+    """
+    Updates specific demographic fields of an existing patient.
 
-@router.post("/to-triage", response_model= ServiceSheetResponse, status_code= HTTPStatus.CREATED)
-async def check_in_patient(patient_id: PydanticObjectId, receptionist_id: PydanticObjectId):
+    Args:
+        patient_id: The unique PydanticObjectId of the patient to update.
+        patient_data: A PatientUpdate schema containing the modified fields.
+        current_receptionist: The authenticated receptionist, injected by dependency.
+
+    Returns:
+        The updated Patient document object.
+
+    Raises:
+        HTTPException: If the patient ID does not exist in the database (HTTP 404).
+    """
     
-    pid = PydanticObjectId(patient_id) if PydanticObjectId.is_valid(patient_id) else PydanticObjectId()
-    rid = PydanticObjectId(receptionist_id) if PydanticObjectId.is_valid(receptionist_id) else PydanticObjectId()
+    try:
+        updated_patient = await PatientService.update_patient(patient_id=patient_id, new_data=patient_data)
+        return updated_patient
     
-    return ServiceSheetResponse(id= PydanticObjectId(),
-                                patient_ref= pid,
-                                receptionist_ref= rid,
-                                created_at= datetime.now(),
-                                updated_at= datetime.now())
+    except PatientNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect patient ID or patient does not exist in the database."
+            )
+
+@router.post("/{patient_id}/triage", response_model= ServiceSheetResponse, status_code= HTTPStatus.CREATED)
+async def check_in_patient(patient_id: PydanticObjectId, current_receptionist: User = Depends(get_current_receptionist_user)):
+    """
+    Checks a patient into the triage queue.
+
+    Initiates the clinical flow by creating a ServiceSheet. The receptionist ID 
+    is automatically extracted from the authenticated user token to guarantee data integrity.
+
+    Args:
+        patient_id: The unique PydanticObjectId of the patient entering the queue.
+        current_receptionist: The authenticated receptionist, injected by dependency.
+
+    Returns:
+        The newly created ServiceSheet document formatted as a ServiceSheetResponse DTO.
+
+    Raises:
+        HTTPException: If the patient ID or receptionist ID does not exist (HTTP 404).
+    """
+    
+    try:
+        new_service = await PatientService.check_in_patient(patient_id=patient_id,
+                                                            receptionist_id=current_receptionist.id)
+        return new_service
+    
+    except PatientNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect patient ID or patient does not exist in the database."
+            )
+    
+    except ReceptionistNotFoundError as e:
+        raise  HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect receptionist ID or receptionist does not exist in the database."
+            )

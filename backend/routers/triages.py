@@ -1,78 +1,159 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from http import HTTPStatus
-from typing import Optional, List
-from datetime import datetime, timedelta, date
+from typing import List
 from beanie import PydanticObjectId
 
-
-from contracts import (TriageQueueItem, RaceEnum, SexEnum,
-                       ServiceSheetResponse, ServiceSheetResponse, TriageStatus,
-                       TriageInvestigationQA, TriageDataPhaseOne, TriageDataPhaseTwo,
-                       TriageDataPhaseThree, ServiceSheetDetail, PatientCreate)
-from models import Patient, ServiceSheet
+from contracts import (
+    TriageQueueItem, ServiceSheetDetail, 
+    TriageInvestigationQA, TriageDataPhaseOne, 
+    TriageDataPhaseTwo, TriageDataPhaseThree
+)
+from models import User
+from dependencies import get_current_nurse_user
+from services.triages import TriageService
+from exceptions import (
+    ServiceSheetNotFoundError, NurseNotFoundError, 
+    PatientNotFoundError, InvalidTriageStateError, 
+    IncompleteTriageDataError
+)
 
 router = APIRouter(prefix="/triages", tags=["triage_management"])
 
 @router.get("/queue", response_model=List[TriageQueueItem])
-async def get_triage_queue():
+async def get_triage_queue(current_nurse: User = Depends(get_current_nurse_user)):
     """
-    Retorna apenas o necessário para montar o Card no Front.
+    Retrieves the queue of patients waiting for triage.
+
+    Args:
+        current_nurse: The authenticated nurse or admin, injected by dependency.
+
+    Returns:
+        A list of TriageQueueItem objects representing patients awaiting service.
     """
     
-    return [
-        TriageQueueItem(
-            sheet_id=PydanticObjectId(),
-            patient_id=PydanticObjectId(),
-            patient_name="Maria da Silva",
-            arrival_time=datetime.now() - timedelta(minutes=25)
-        ),
-        TriageQueueItem(
-            sheet_id=PydanticObjectId(),
-            patient_id=PydanticObjectId(),
-            patient_name="João Souza",
-            arrival_time=datetime.now() - timedelta(minutes=10)
-        )
-    ]
+    queue = await TriageService.get_triage_queue()
+    return queue
 
 @router.post("/{sheet_id}/start", response_model=ServiceSheetDetail)
-async def start_triage(sheet_id: PydanticObjectId, nurse_id: PydanticObjectId):
+async def start_triage(sheet_id: PydanticObjectId, current_nurse: User = Depends(get_current_nurse_user)):
+    """
+    Locks a service sheet and assigns it to the requesting nurse.
+
+    The nurse ID is securely extracted from the authenticated user's token.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet.
+        current_nurse: The authenticated nurse or admin, injected by dependency.
+
+    Returns:
+        The updated ServiceSheetDetail object reflecting the 'em_triagem' status.
+
+    Raises:
+        HTTPException: If the sheet/patient is not found (404) or if the state is invalid (400).
+    """
     
-    patient = PatientCreate(id=PydanticObjectId(),
-                            name="Gabriel Lacerda",
-                            cpf="123.456.789-00",
-                            rg="12.345.678-9",
-                            birth_date= date.today(),
-                            address="Casa do Mock",
-                            companion= False,
-                            race= RaceEnum.ignorado,
-                            sex=SexEnum.masculino,
-                            phone_num="1234-5678")
+    try:
+        sheet_detail = await TriageService.start_triage(sheet_id=sheet_id,
+                                                        nurse_id=current_nurse.id)
+        return sheet_detail
     
-    return ServiceSheetDetail(id=sheet_id,
-                                patient=patient,
-                                status=TriageStatus.em_triagem,
-                                created_at=datetime.now())
+    except(ServiceSheetNotFoundError, NurseNotFoundError, PatientNotFoundError) as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e))
+    
+    except InvalidTriageStateError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e))
 
 @router.post("/{sheet_id}/phase-one", response_model=List[TriageInvestigationQA])
-async def execute_part_one(sheet_id: PydanticObjectId, input_data: TriageDataPhaseOne):
+async def execute_part_one(sheet_id: PydanticObjectId, input_data: TriageDataPhaseOne, current_nurse: User = Depends(get_current_nurse_user)):
+    """
+    Executes Phase 1 of triage, saving vitals and fetching AI questions.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet.
+        input_data: A TriageDataPhaseOne schema containing vitals and initial observations.
+        current_nurse: The authenticated nurse or admin, injected by dependency.
+
+    Returns:
+        A list of AI-generated TriageInvestigationQA objects for the nurse to ask.
+
+    Raises:
+        HTTPException: If the sheet is not found (404).
+    """
     
-    return [
-        TriageInvestigationQA(question_id=PydanticObjectId(),
-                            question_text="Isso é um mock somente para testar a API?",
-                            ai_reasoning="Eu sou uma IA real?",
-                            ),
-        TriageInvestigationQA(question_id=PydanticObjectId(),
-                            question_text="Isso é um mock somente para testar a API?",
-                            ai_reasoning="Eu sou uma IA real?",
-                            )
-    ]
+    try:
+        questions = await TriageService.execute_phase_one(sheet_id=sheet_id,
+                                                          input_data=input_data)
+        return questions
+    
+    except ServiceSheetNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e))
 
 @router.post("/{sheet_id}/phase-two", response_model=str)
-async def execute_part_two(sheet_id: PydanticObjectId, input_data: TriageDataPhaseTwo):
+async def execute_part_two(sheet_id: PydanticObjectId, input_data: TriageDataPhaseTwo, current_nurse: User = Depends(get_current_nurse_user)):
+    """
+    Executes Phase 2 of triage, processing patient answers to generate a diagnostic suggestion.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet.
+        input_data: A TriageDataPhaseTwo schema containing answered questions.
+        current_nurse: The authenticated nurse or admin, injected by dependency.
+
+    Returns:
+        The AI-generated medical suggestion string.
+
+    Raises:
+        HTTPException: If the sheet is not found (404) or Phase 1 data is missing (400).
+    """
     
-    return "Isso aqui é um exemplo de texto que pode ser retornado pela IA."
+    try:
+        suggestion = await TriageService.execute_phase_two(sheet_id=sheet_id,
+                                                          input_data=input_data)
+        return suggestion
+    
+    except ServiceSheetNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e))
+        
+    except IncompleteTriageDataError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e))
 
 @router.post("/{sheet_id}/phase-three", response_model=bool)
-async def execute_part_three(sheet_id: PydanticObjectId, input_data: TriageDataPhaseThree):
+async def execute_part_three(sheet_id: PydanticObjectId, input_data: TriageDataPhaseThree, current_nurse: User = Depends(get_current_nurse_user)):
+    """
+    Executes Phase 3, finalizing the triage and assigning the clinical risk.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet.
+        input_data: A TriageDataPhaseThree schema containing the final risk level.
+        current_nurse: The authenticated nurse or admin, injected by dependency.
+
+    Returns:
+        A boolean confirming the operation success and trigger of the background task.
+
+    Raises:
+        HTTPException: If the sheet is not found (404) or prior phase data is missing (400).
+    """
     
-    return True
+    try:
+        success = await TriageService.execute_phase_three(sheet_id=sheet_id, input_data=input_data)
+        return success
+    
+    except ServiceSheetNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e))
+    
+    except IncompleteTriageDataError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e)
+        )

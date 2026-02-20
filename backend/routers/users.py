@@ -1,93 +1,128 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from http import HTTPStatus
 from typing import List
-from datetime import datetime
-from beanie import PydanticObjectId
 
 from models import User
 from contracts import UserCreate, UserResponse, UserUpdate
-
-def fake_hash_password(password: str):
-    return f"hashed_{password}"
+from services.users import UserService
+from dependencies import get_current_admin_user
+from exceptions import UserNotFoundError, DuplicateUserError
 
 router = APIRouter(prefix = "/users",  tags=["user_management"])
 
 @router.get("/", response_model=List[UserResponse])
-async def list_users():
+async def list_users(current_admin: User = Depends(get_current_admin_user)):
     """
-    Retorna uma lista fixa de usuários para teste de layout.
+    Retrieves a list of all registered staff members.
+
+    Args:
+        current_admin: The authenticated administrator, injected by dependency.
+
+    Returns:
+        A list of User objects formatted as UserResponse DTOs.
     """
-    return [
-        UserResponse(
-            id=PydanticObjectId(),
-            name="Gabriel Lacerda",
-            email="gabriel@medgemma.com.br",
-            cpf="123.456.789-00",
-            rg="12.345.678-9",
-            role="admin",
-            specialization=None,
-            created_at=datetime.now()
-        ),
-        UserResponse(
-            id=PydanticObjectId(),
-            name="Dra. Ana Silva",
-            email="ana@medgemma.com.br",
-            cpf="987.654.321-00",
-            rg="98.765.432-1",
-            role="doctor",
-            specialization="Cardiologia",
-            created_at=datetime.now()
-        )
-    ]
+    
+    users_list = await UserService.list_users()
+    
+    return users_list
 
 @router.get("/{user_id}", response_model = UserResponse)
-async def get_user(user_id: str):
+async def get_user(user_id: str, current_admin: User = Depends(get_current_admin_user)):
     """
-    Retorna sempre o mesmo usuário, fingindo que buscou pelo ID.
+    Fetches a specific staff member by their unique database ID.
+
+    Args:
+        user_id: The unique PydanticObjectId of the target user.
+        current_admin: The authenticated administrator, injected by dependency.
+
+    Returns:
+        The requested User object formatted as a UserResponse DTO.
+
+    Raises:
+        HTTPException: If the user ID does not exist in the database (HTTP 404).
     """
-    return UserResponse(
-        id=PydanticObjectId(user_id) if PydanticObjectId.is_valid(user_id) else PydanticObjectId(),
-        name="Usuário Mockado da Silva",
-        email="mock@medgemma.com.br",
-        cpf="000.000.000-00",
-        rg="00.000.000-0",
-        role="nurse",
-        created_at=datetime.now()
-    )
+    
+    try:
+        user = await UserService.get_user_by_id(user_id=user_id)
+        return user
+    
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect user ID or user does not exist in the database."
+        )
 
 @router.post("/", response_model = UserResponse, status_code = HTTPStatus.CREATED)
-async def create_user(user_data: UserCreate):
+async def create_user(user_data: UserCreate, current_admin: User = Depends(get_current_admin_user)):
     """
-    Recebe os dados, valida os tipos, e retorna como se tivesse criado.
+    Registers a new staff member in the system.
+
+    Args:
+        user_data: A UserCreate schema containing the registration details.
+        current_admin: The authenticated administrator, injected by dependency.
+
+    Returns:
+        The newly created User object formatted as a UserResponse DTO.
+
+    Raises:
+        HTTPException: If a user with the provided Email or CPF already exists (HTTP 409).
     """
-    
-    return UserResponse(
-        id=PydanticObjectId(),
-        created_at=datetime.now(),
-        **user_data.model_dump(exclude={"password"}) # Copia os dados enviados (menos senha)
-    )
+    try:
+        new_user = await UserService.create_user(user_data)
+        return new_user
+
+    except DuplicateUserError:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="User with this Email or CPF already exists."
+        )
 
 @router.put("/{user_id}", response_model = UserResponse)
-async def update_user(user_id: str, user_data: UserUpdate):
+async def update_user(user_id: str, user_data: UserUpdate, current_admin: User = Depends(get_current_admin_user)):
     """
-    Simula uma atualização de dados.
+    Updates specific fields of an existing staff member.
+
+    Args:
+        user_id: The unique PydanticObjectId of the user to update.
+        user_data: A UserUpdate schema containing the modified fields.
+        current_admin: The authenticated administrator, injected by dependency.
+
+    Returns:
+        The updated User object formatted as a UserResponse DTO.
+
+    Raises:
+        HTTPException: If the user ID does not exist in the database (HTTP 404).
     """
     
-    return UserResponse(
-        id=PydanticObjectId(user_id) if PydanticObjectId.is_valid(user_id) else PydanticObjectId(),
-        name=user_data.name or "Nome Não Alterado",
-        email=user_data.email or "email@original.com",
-        cpf="123.456.789-00",
-        rg="12.345.678-9",
-        role=user_data.role or "nurse",
-        specialization=user_data.specialization,
-        created_at=datetime.now()
-    )
+    try:
+        updated_user = await UserService.update_user(user_id=user_id, new_data=user_data)
+        return updated_user
+    
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect user ID or user does not exist in the database."
+        )
 
 @router.delete("/{user_id}",status_code = HTTPStatus.NO_CONTENT)
-async def delete_user(user_id: str):
+async def delete_user(user_id: str, current_admin: User = Depends(get_current_admin_user)):
     """
-    Retorna 204 (No Content) para simular sucesso na remoção.
+    Removes a staff member's record from the database.
+
+    Args:
+        user_id: The unique PydanticObjectId of the user to delete.
+        current_admin: The authenticated administrator, injected by dependency.
+
+    Raises:
+        HTTPException: If the user ID does not exist in the database (HTTP 404).
     """
     
-    return None
+    try:
+        deleted_user = await UserService.delete_user(user_id)
+        return deleted_user
+    
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect user ID or user does not exist in the database."
+        )
