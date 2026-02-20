@@ -1,10 +1,10 @@
 from pydantic import Field
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
-from beanie import Document, Link
+from beanie import Document, Link, PydanticObjectId
 from pymongo import IndexModel, ASCENDING
 
-from contracts import UserBase, PatientCreate, TriageStatus, TriageData, DoctorData
+from contracts import UserBase, TriageStatus, TriageData, DoctorData, RaceEnum, SexEnum
 
 class User(Document, UserBase):
     password_hash: str
@@ -17,7 +17,16 @@ class User(Document, UserBase):
             IndexModel([("cpf", ASCENDING)], unique = True)
         ]
 
-class Patient(Document, PatientCreate):
+class Patient(Document):
+    name: str
+    cpf: str
+    rg: str
+    birth_date: date
+    address: str
+    companion: bool
+    race: RaceEnum
+    sex: SexEnum
+    phone_num: str
     
     class Settings:
         name = "patients"
@@ -27,11 +36,11 @@ class Patient(Document, PatientCreate):
         ]
 
 class ServiceSheet(Document):
-    patient_ref: Link[Patient]
-    receptionist_ref: Link[User]
+    patient_ref: PydanticObjectId
+    receptionist_ref: PydanticObjectId
     status: TriageStatus = TriageStatus.aguardando_triagem
-    nurse_ref: Optional[Link[User]] = None
-    doctor_ref: Optional[Link[User]] = None
+    nurse_ref: Optional[PydanticObjectId] = None
+    doctor_ref: Optional[PydanticObjectId] = None
     
     created_at: datetime = Field(default_factory = datetime.now)
     updated_at: datetime = Field(default_factory = datetime.now)
