@@ -73,6 +73,11 @@
     background-color: white;
 }
 
+.content > input:invalid
+{
+    background-color: rgba(255, 102, 102, 0.548);
+}
+
 .actions
 {
     margin-top: 1vh;
