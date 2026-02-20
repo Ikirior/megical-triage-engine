@@ -7,7 +7,9 @@ type singlebutton_params = {
     icon: any,
     backgroudColor?: string,
     text?: string,
-    action?: Function
+    action?: Function,
+    submit?: boolean,
+    formAction?: (args:FormData) => void
 }
 
 export default function SingleButton(params: singlebutton_params)
@@ -22,7 +24,7 @@ export default function SingleButton(params: singlebutton_params)
         }
 
     return (
-        <button className={styles.button} style={styles_obj} onClick={params.action as MouseEventHandler<HTMLButtonElement>}>
+        <button className={styles.button} style={styles_obj} formAction={params?.formAction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
             {params.icon}
             {params.text}
         </button>

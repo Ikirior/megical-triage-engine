@@ -32,7 +32,8 @@ export default function UserGroup(params: usergroupparams)
         }
     ).toArray();
 
-    let keys = Object.keys(params?.users?.at(0) ?? {}).sort().map((element, i) => <div key={'key-'+i}>{element}</div>)
+    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date']
+    const keyElements = KEYS.map((element, i) => <div key={'key-'+i}>{element}</div>)
 
     return (
         <div className={styles.userspanel}>
@@ -40,23 +41,14 @@ export default function UserGroup(params: usergroupparams)
             <section className={styles.usergroup}>
                 <h2>{params.title}</h2>
                 <div className={styles.content}>
-                    {...keys}
+                    {...keyElements}
                 </div>
                 <hr/>
                 <div>
                     {...cellNodes}
                     {
                         state.creatingUser &&
-                        <UserSection cell={{
-                            id:'',
-                            cpf:'000.000.000-00',
-                            name: 'Dr. Anne',
-                            email: 'example@example.com',
-                            rg: '00.000.000-0',
-                            role: params.title.toLocaleLowerCase(),
-                            specialization: 'Dermatology',
-                            created_at: new Date().toString()
-                        }} newUser={true}/>
+                        <UserSection newUser={true} role={params.title.toLowerCase()}/>
                     }
                 </div>
             </section>
