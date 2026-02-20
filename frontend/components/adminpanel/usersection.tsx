@@ -21,14 +21,15 @@ export default function UserSection(params: usersection_params)
             <div className={styles.content}>
                 
                     <input type="text" name="id" id={node_id+'id'} value={params.cell?.id} placeholder="---" readOnly/>
-                    <input type="text" name="rg" id={node_id+'rg'} defaultValue={params.cell?.rg} placeholder="00.000.000-0" pattern="\d{2}.\d{3}.\d{3}-\d"/>
-                    <input type="text" name="cpf" id={node_id+'cpf'} defaultValue={params.cell?.cpf} placeholder="000.000.000-00" pattern="\d{3}.\d{3}.\d{3}-\d{2}"/>
-                    <input type="text" name="name" id={node_id+'name'} defaultValue={params.cell?.name} placeholder="Dr. Anne" pattern="([a-zA-Z]|\s|\.)+" />
-                    <input type="email" name="email" id={node_id+'email'} defaultValue={params.cell?.email} placeholder="example@example.com"/>
+                    <input type="text" name="rg" id={node_id+'rg'} defaultValue={params.cell?.rg} placeholder="00.000.000-0" pattern="\d{2}.\d{3}.\d{3}-\d" required={params.newUser}/>
+                    <input type="text" name="cpf" id={node_id+'cpf'} defaultValue={params.cell?.cpf} placeholder="000.000.000-00" pattern="\d{3}.\d{3}.\d{3}-\d{2}" required={params.newUser}/>
+                    <input type="text" name="name" id={node_id+'name'} defaultValue={params.cell?.name} placeholder="Dr. Anne" pattern="([a-zA-Z]|\s|\.)+" required={params.newUser}/>
+                    <input type="email" name="email" id={node_id+'email'} defaultValue={params.cell?.email} placeholder="example@example.com" required={params.newUser}/>
                     <input type="text" name="specialization" id={node_id+'specialization'} defaultValue={params.cell?.specialization} placeholder="Dermatology"/>
-                    <input type="text" name="role" id={node_id+'role'} value={params.role ?? params.cell?.role} readOnly placeholder="---"/>
+                    <input type="text" name="role" id={node_id+'role'} value={params.role ?? params.cell?.role} readOnly placeholder="---" required={params.newUser}/>
                     <input type="text" name="created_at" id={node_id+'created_at'} value={params.cell?.created_at && new Date(params.cell?.created_at).toString()} placeholder="---" readOnly/>
-                    
+
+                    <input type="password" name="password" id={node_id+'password'} placeholder={params.newUser ? 'Insert New Password' : 'Click to change password'} required={params.newUser} pattern=".{8}.*"/>
             </div>
             <div className={styles.sectionbuttons}>
                 {

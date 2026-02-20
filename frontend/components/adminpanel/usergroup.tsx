@@ -32,7 +32,7 @@ export default function UserGroup(params: usergroupparams)
         }
     ).toArray();
 
-    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date']
+    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date', 'Password']
     const keyElements = KEYS.map((element, i) => <div key={'key-'+i}>{element}</div>)
 
     return (
@@ -40,10 +40,9 @@ export default function UserGroup(params: usergroupparams)
 
             <section className={styles.usergroup}>
                 <h2>{params.title}</h2>
-                <div className={styles.content}>
+                <div className={styles.content} style={{borderBottom: "thin #636363 solid"}}>
                     {...keyElements}
                 </div>
-                <hr/>
                 <div>
                     {...cellNodes}
                     {
