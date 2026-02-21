@@ -15,7 +15,7 @@ async function getUsername()
     }
     else return undefined;
 
-}
+}   
 
 export default async function Navbar()
 {
