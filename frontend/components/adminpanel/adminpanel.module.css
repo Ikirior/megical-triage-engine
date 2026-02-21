@@ -6,7 +6,7 @@
     width: fit-content;
 }
 
-.usersection:hover > .sectionbuttons
+.usersection:hover .sectionbuttons > button
 {
     opacity: 1;
 }
@@ -17,10 +17,15 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
-    opacity: 0;
 
     position: absolute;
     right: 1vw;
+}
+
+.sectionbuttons > button
+{
+    opacity: 0;
+    transition: none;
 }
 
 .usergroup

@@ -1,7 +1,8 @@
 'use client';
 
 import styles from "@/components/singlebutton/singlebutton.module.css"
-import { MouseEventHandler } from "react"
+import { responseManagerResponse } from "@/utils/responsemanager";
+import { JSX, MouseEventHandler, useActionState } from "react"
 
 type singlebutton_params = {
     icon: any,
@@ -9,14 +10,23 @@ type singlebutton_params = {
     text?: string,
     action?: Function,
     submit?: boolean,
-    formAction?: (args:FormData) => void,
+    formAction?: (initialState:responseManagerResponse, args:FormData) => Promise<responseManagerResponse>,
     title?: string
 }
 
 export default function SingleButton(params: singlebutton_params)
 {
+    const error_msg:JSX.Element[] = [];
+    let action_func = undefined
+    if(params?.formAction)
+        {
+            const [state, action, isPending] = useActionState(params.formAction, {"msg": null, "success": false})
+            action_func = action;
+            if(!state.success && state.msg)
+                error_msg.push(state.msg)
+        }
+    
     let styles_obj = {}
-
     if(params.backgroudColor)
         {
             styles_obj = {
@@ -25,9 +35,12 @@ export default function SingleButton(params: singlebutton_params)
         }
 
     return (
-        <button className={styles.button} style={styles_obj} title={params?.title} formAction={params?.formAction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
-            {params.icon}
-            {params.text}
-        </button>
+        <>
+            {...error_msg}
+            <button className={styles.button} style={styles_obj} title={params?.title} formAction={action_func} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
+                {params.icon}
+                {params.text}
+            </button>
+        </>
     )
 }

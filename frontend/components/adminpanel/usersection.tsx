@@ -1,3 +1,5 @@
+'use client';
+
 import styles from "@/components/adminpanel/adminpanel.module.css"
 import SingleButton from "../singlebutton/singlebutton"
 import { Trash2Icon, SaveIcon, UserPlus2Icon } from "lucide-react"
@@ -9,7 +11,9 @@ import AddUser from "./add_user";
 type usersection_params = {
     cell?: cell,
     newUser?: boolean,
-    role?: string
+    role?: string,
+    setUsers?: Function,
+    usersState?: cell[]
 }
 
 export default function UserSection(params: usersection_params)
@@ -21,8 +25,8 @@ export default function UserSection(params: usersection_params)
             <div className={styles.content}>
                 
                     <input type="text" name="id" id={node_id+'id'} value={params.cell?.id} placeholder="---" readOnly/>
-                    <input type="text" name="rg" id={node_id+'rg'} defaultValue={params.cell?.rg} placeholder="00.000.000-0" pattern="\d{2}.\d{3}.\d{3}-\d" required={params.newUser}/>
-                    <input type="text" name="cpf" id={node_id+'cpf'} defaultValue={params.cell?.cpf} placeholder="000.000.000-00" pattern="\d{3}.\d{3}.\d{3}-\d{2}" required={params.newUser}/>
+                    <input type="text" name="rg" id={node_id+'rg'} defaultValue={params.cell?.rg} placeholder="00.000.000-0" pattern="\d{2}.\d{3}.\d{3}-\d" readOnly={!params.newUser} required={params.newUser}/>
+                    <input type="text" name="cpf" id={node_id+'cpf'} defaultValue={params.cell?.cpf} placeholder="000.000.000-00" pattern="\d{3}.\d{3}.\d{3}-\d{2}" readOnly={!params.newUser} required={params.newUser}/>
                     <input type="text" name="name" id={node_id+'name'} defaultValue={params.cell?.name} placeholder="Dr. Anne" pattern="([a-zA-Z]|\s|\.)+" required={params.newUser}/>
                     <input type="email" name="email" id={node_id+'email'} defaultValue={params.cell?.email} placeholder="example@example.com" required={params.newUser}/>
                     <input type="text" name="specialization" id={node_id+'specialization'} defaultValue={params.cell?.specialization} placeholder="Dermatology"/>
@@ -35,14 +39,44 @@ export default function UserSection(params: usersection_params)
                 {
                     !params.newUser && 
                     <>
-                        <SingleButton icon={<Trash2Icon/>} backgroudColor="#ff5145" submit={true} formAction={DeleteUser} title="delete user"/>
-                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={UpdateUser} title="update user"/>
+                        <SingleButton icon={<Trash2Icon/>} backgroudColor="#ff5145" submit={true} formAction={async (initialState, args) => {
+                            
+                            const resMan = await DeleteUser(initialState, args);
+                            if(resMan.success && params.setUsers && params.usersState)
+                                // Update users with all but the deleted one
+                                params.setUsers([...params.usersState].filter(
+                                    (user) => user.id != params.cell?.id
+                                ))
+                            return resMan;
+                            
+                            }} title="delete user"/>
+                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
+                            
+                            const resMan = await UpdateUser(initialState, args);
+                            console.log(resMan.success, params.setUsers, params.usersState)
+                            if(resMan.success && params.setUsers && params.usersState)
+                            {
+                                // Replace user with updated version
+                                params.setUsers(params.usersState.map(
+                                    (user) => user.id == params.cell?.id ? resMan.content : user
+                                ))
+                            }
+                            return resMan;
+                            
+                            }} title="update user"/>
                     </>
                 }
                 {
                     params.newUser && 
                     <>
-                        <SingleButton icon={<UserPlus2Icon/>} text='Save User' backgroudColor="#dcff5e" submit={true} formAction={AddUser} title="save new user"/>
+                        <SingleButton icon={<UserPlus2Icon/>} text='Save User' backgroudColor="#dcff5e" submit={true} formAction={async (initialState, args) => {
+                            
+                            const resMan = await AddUser(initialState, args);
+                            if(resMan.success && params.setUsers && params.usersState)
+                                params.setUsers([...params.usersState, resMan.content])
+                            return resMan;
+                            
+                            }} title="save new user"/>
                     </>
                 }
             </div>
