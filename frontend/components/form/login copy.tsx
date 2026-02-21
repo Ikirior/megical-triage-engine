@@ -15,7 +15,6 @@ async function getUser()
         type decoded = {id: string}
         const tokenContent = decode(token.value) as decoded;
 
-        console.log(tokenContent);
         /*
         const userInfo = (await fetch(`http://backend_server:3001/users/${tokenContent.id}`, {
             "method": "DELETE",

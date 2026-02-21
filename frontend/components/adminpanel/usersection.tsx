@@ -53,7 +53,6 @@ export default function UserSection(params: usersection_params)
                         <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
                             
                             const resMan = await UpdateUser(initialState, args);
-                            console.log(resMan.success, params.setUsers, params.usersState)
                             if(resMan.success && params.setUsers && params.usersState)
                             {
                                 // Replace user with updated version
