@@ -1,5 +1,6 @@
 import FormComp from "@/components/form/form_comp";
 import style from '@/app/login/styles.module.css'
+import Message from "@/components/messages/msg";
 
 export default function LoginPage() {
   return (

@@ -22,13 +22,14 @@ function addUser(setState: Function)
 export default function UserGroup(params: usergroupparams)
 {
 
+    const [usersState, setUsers] = useState(params.users)
     const [state, setState] = useState({creatingUser: false})
 
-    let cellNodes = params.users.values().map(
+    let cellNodes = usersState.values().map(
         // For each cell object
         (cellElement: cell, i) => 
         {
-            return <UserSection cell={cellElement} key={'user-'+cellElement.cpf}/>
+            return <UserSection cell={cellElement} key={'user-'+cellElement.cpf} setUsers={setUsers} usersState={usersState}/>
         }
     ).toArray();
 
@@ -47,7 +48,7 @@ export default function UserGroup(params: usergroupparams)
                     {...cellNodes}
                     {
                         state.creatingUser &&
-                        <UserSection newUser={true} role={params.title.toLowerCase()}/>
+                        <UserSection newUser={true} role={params.title.toLowerCase()} setUsers={setUsers} usersState={usersState}/>
                     }
                 </div>
             </section>

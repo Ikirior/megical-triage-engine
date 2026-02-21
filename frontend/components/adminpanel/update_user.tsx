@@ -1,6 +1,9 @@
 'use server';
 
-export default async function UpdateUser(params: FormData) {
+import getTokenHeaderValue from "@/utils/getTokenHeader";
+import ResponseManager, { responseManagerResponse } from "@/utils/responsemanager";
+
+export default async function UpdateUser(initialState: responseManagerResponse, params: FormData) {
 
     let payload = {
         "name": params.get('name'),
@@ -14,11 +17,15 @@ export default async function UpdateUser(params: FormData) {
 
     let uptReq = await fetch(`http://backend_server:3001/users/${params.get('id')}`, {
         "method": "PUT",
-        "body": JSON.stringify(payload)
+        "body": JSON.stringify(payload),
+        "headers": {
+            "Authorization": await getTokenHeaderValue(),
+            'Content-Type': 'application/json'
+        }
     })
     let res = uptReq.status;
 
     console.log('updated')
 
-    return res
+    return ResponseManager(uptReq)
 }
