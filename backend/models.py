@@ -13,7 +13,7 @@ class User(Document, UserBase):
     class Settings:
         name = "users"
         indexes = [
-            IndexModel([("email", ASCENDING)], unique = True),
+            IndexModel([("email", ASCENDING)]),
             IndexModel([("cpf", ASCENDING)], unique = True)
         ]
 

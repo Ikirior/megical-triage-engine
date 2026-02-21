@@ -42,7 +42,6 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
-    role: Optional[str] = None
     specialization: Optional[str] = None
     password: Optional[str] = None
 
