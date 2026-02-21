@@ -6,21 +6,29 @@ import { decode } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-async function getUser(token:any)
+async function getUser()
 {
+    const cookiesObj = await cookies();
+    const token = cookiesObj.get('session_token');
+    if(token)
+    {
+        type decoded = {id: string}
+        const tokenContent = decode(token.value) as decoded;
 
-    type decoded = {sub: string}
-    console.log(token);
-    const tokenContent = decode(token) as decoded;
-    console.log(tokenContent);
-    const userInfo = await (await fetch(`http://backend_server:3001/users/${tokenContent.sub}`, {
-        "headers": {
-            "Authorization": await getTokenHeaderValue(),
-            'Content-Type': 'application/json'
-        }
-    })).json();
+        console.log(tokenContent);
+        /*
+        const userInfo = (await fetch(`http://backend_server:3001/users/${tokenContent.id}`, {
+            "method": "DELETE",
+            "headers": {
+                "Authorization": await getTokenHeaderValue(),
+                'Content-Type': 'application/json'
+            }
+        })).json()
+        */
 
-    return userInfo;
+        return {};
+    }
+        return {};
 }
 
 export default async function Login(initialState: responseManagerResponse, params: FormData) {
@@ -46,9 +54,8 @@ export default async function Login(initialState: responseManagerResponse, param
     
         cookies_data.set('session_token', logRes.access_token);
         
-        const userInfo = await getUser(logRes.access_token);
-        cookies_data.set('username', userInfo.name);
-
+        const userInfo = await getUser();
+        //cookies_data.set('username', userInfo.username)
         //const res = NextResponse.next();
         //console.log((await headers()).get('referer'))
 

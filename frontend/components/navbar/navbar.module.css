@@ -9,4 +9,25 @@
     padding: 10px;
     background-color: var(--midtone);
     color: white;
+    position: relative;
+}
+
+.side
+{
+    position: absolute;
+    bottom: -0.5em;
+    background-color: var(--shadow);
+    min-width: 5vw;
+    display: flex;
+    flex-direction: column;
+}
+
+.side > *
+{
+    cursor: pointer;
+}
+
+.userprofile
+{
+    cursor: pointer;
 }
