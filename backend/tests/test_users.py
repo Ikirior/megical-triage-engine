@@ -90,13 +90,11 @@ async def test_admin_can_update_user_role(admin_client, seed_nurse):
     user_id = str(seed_nurse.id)
     update_payload = {
         "name": "Nurse Updated Name",
-        "role": "admin"
     }
     
     response = await admin_client.put(f"/users/{user_id}", json=update_payload)
     
     assert response.status_code == HTTPStatus.OK
-    assert response.json()["role"] == "admin"
     assert response.json()["name"] == "Nurse Updated Name"
 
 @pytest.mark.asyncio

@@ -17,11 +17,9 @@ async def setup_test_database():
     client = AsyncIOMotorClient(mongo_url)
     database = client.medgemma_test_db
     
-    await init_beanie(database=database, document_models=[User, Patient, ServiceSheet])
+    await client.drop_database("medgemma_test_db")
     
-    await User.find_all().delete()
-    await Patient.find_all().delete()
-    await ServiceSheet.find_all().delete()
+    await init_beanie(database=database, document_models=[User, Patient, ServiceSheet])
     
     yield
     
