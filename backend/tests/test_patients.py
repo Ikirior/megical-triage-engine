@@ -136,3 +136,23 @@ async def test_unauthenticated_access_is_blocked(guest_client):
     response = await guest_client.get("/patients/111.222.333-44")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
 
+@pytest.mark.asyncio
+async def test_update_patient_unauthorized_fields_rejected(receptionist_client, seed_patient):
+    """
+    Verifies that attempting to update restricted fields (like 'name' or 'cpf')
+    returns a 400 Bad Request with a custom detail string for the frontend.
+    """
+    patient_id = str(seed_patient.id)
+    
+    invalid_payload = {
+        "phone_num": "(22) 99999-9999",
+        "name": "Nome Hackeado" 
+    }
+    
+    response = await receptionist_client.put(f"/patients/{patient_id}", json=invalid_payload)
+    
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    data = response.json()
+    
+    assert "detail" in data
+    assert "Update failed. Unauthorized fields detected: name" in data["detail"]
