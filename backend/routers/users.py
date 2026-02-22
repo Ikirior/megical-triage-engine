@@ -5,7 +5,7 @@ from typing import List
 from models import User
 from contracts import UserCreate, UserResponse, UserUpdate
 from services.users import UserService
-from dependencies import get_current_admin_user
+from dependencies import get_current_admin_user, get_current_user
 from exceptions import UserNotFoundError, DuplicateUserError
 
 router = APIRouter(prefix = "/users",  tags=["user_management"])
@@ -27,7 +27,7 @@ async def list_users(current_admin: User = Depends(get_current_admin_user)):
     return users_list
 
 @router.get("/{user_id}", response_model = UserResponse)
-async def get_user(user_id: str, current_admin: User = Depends(get_current_admin_user)):
+async def get_user(user_id: str, current_user: User = Depends(get_current_user)):
     """
     Fetches a specific staff member by their unique database ID.
 
@@ -41,6 +41,11 @@ async def get_user(user_id: str, current_admin: User = Depends(get_current_admin
     Raises:
         HTTPException: If the user ID does not exist in the database (HTTP 404).
     """
+    if current_user.role != "admin" and str(current_user.id) != str(user_id):
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Access denied. Users can only access their own profiles."
+        )
     
     try:
         user = await UserService.get_user_by_id(user_id=user_id)
