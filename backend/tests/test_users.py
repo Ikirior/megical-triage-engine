@@ -145,3 +145,34 @@ async def test_unauthenticated_access_is_blocked(guest_client):
     """
     response = await guest_client.get("/users/")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+    
+
+@pytest.mark.asyncio
+async def test_user_can_access_own_profile(nurse_client, seed_nurse):
+    """
+    Ensures that a non-admin user (e.g., a nurse) can successfully 
+    retrieve their own profile data using their specific ID.
+    """
+    user_id = str(seed_nurse.id)
+    
+    response = await nurse_client.get(f"/users/{user_id}")
+    
+    assert response.status_code == HTTPStatus.OK
+    data = response.json()
+    assert data["id"] == user_id
+    assert data["email"] == seed_nurse.email
+
+@pytest.mark.asyncio
+async def test_user_cannot_access_other_profiles(nurse_client, seed_admin):
+    """
+    Validates the RBAC restriction: a non-admin user attempting to fetch
+    another user's ID must receive a 403 Forbidden.
+    """
+    other_user_id = str(seed_admin.id)
+    
+    response = await nurse_client.get(f"/users/{other_user_id}")
+    
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    data = response.json()
+    
+    assert data["detail"] == "Access denied. Users can only access their own profiles."
