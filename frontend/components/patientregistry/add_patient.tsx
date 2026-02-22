@@ -3,19 +3,21 @@
 import getTokenHeaderValue from "@/utils/getTokenHeader";
 import ResponseManager, { responseManagerResponse } from "@/utils/responsemanager";
 
-export default async function AddUser(initialState:responseManagerResponse, params: FormData) {
+export default async function AddPatient(initialState:responseManagerResponse, params: FormData) {
 
     const payload = {
         "name": params.get('name'),
-        "email": params.get('email'),
         "cpf": params.get('cpf'),
         "rg": params.get('rg'),
-        "role": params.get('role'),
-        "specialization": params.get('specialization'),
-        "password": params.get('password')
+        "birth_date": params.get('birth_date'),
+        "address": params.get('address'),
+        "companion": params.has('companion'),
+        "race": params.get('race'),
+        "sex": params.get('sex'),
+        "phone_num": params.get('phone_num')
     }
 
-    const addReq = await fetch(`http://backend_server:3001/users/`, {
+    const addReq = await fetch(`http://backend_server:3001/patients/`, {
         "method": "POST",
         "body": JSON.stringify(payload),
         "headers": {

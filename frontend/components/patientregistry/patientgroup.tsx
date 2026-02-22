@@ -1,16 +1,17 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "../singlebutton/singlebutton"
+import SingleButton from "@/components/singlebutton/singlebutton";
 import {UserPlus2 } from "lucide-react"
-import UserSection from "./usersection"
-import cell from "./cell"
+import patient from "./patient";
 import { useState } from "react";
+import PatientSection from "./patientsection";
 
 type usergroupparams = {
     icon?: any,
     title: string,
-    users: cell[]
+    users: patient[],
+    setUsers: Function
 }
 
 function addUser(setState: Function)
@@ -18,21 +19,20 @@ function addUser(setState: Function)
     setState({creatingUser: true});
 }
 
-export default function UserGroup(params: usergroupparams)
+export default function PatientGroup(params: usergroupparams)
 {
-
-    const [usersState, setUsers] = useState(params.users)
+    const [usersState, setUsers] = [params.users, params.setUsers]
     const [state, setState] = useState({creatingUser: false})
-
+    
     let cellNodes = usersState.values().map(
         // For each cell object
-        (cellElement: cell, i) => 
+        (cellElement: patient, i) => 
         {
-            return <UserSection cell={cellElement} key={'user-'+cellElement.cpf} setUsers={setUsers} usersState={usersState}/>
+            return <PatientSection cell={cellElement} key={'user-'+cellElement.cpf} setUsers={setUsers} usersState={usersState}/>
         }
     ).toArray();
 
-    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date', 'Password']
+    const KEYS=['Id', 'RG', 'CPF', 'Name', 'Birth Date', 'Address', 'Accompanied?', 'Race', 'Sex', 'Phone Number']
     const keyElements = KEYS.map((element, i) => <div key={'key-'+i}>{element}</div>)
 
     return (
@@ -47,7 +47,7 @@ export default function UserGroup(params: usergroupparams)
                     {...cellNodes}
                     {
                         state.creatingUser &&
-                        <UserSection newUser={true} role={params.title.toLowerCase()} setUsers={setUsers} usersState={usersState}/>
+                        <PatientSection newUser={true} role={params.title.toLowerCase()} setUsers={setUsers} usersState={usersState}/>
                     }
                 </div>
             </section>
