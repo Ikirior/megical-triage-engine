@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from http import HTTPStatus
 from typing import Optional
 from datetime import datetime, date
@@ -67,7 +67,7 @@ async def create_patient(patient_data: PatientCreate, current_receptionist: User
         )
 
 @router.put("/{patient_id}", response_model = Patient)
-async def update_patient(patient_id: PydanticObjectId, patient_data: PatientUpdate, current_receptionist: User = Depends(get_current_receptionist_user)):
+async def update_patient(patient_id: PydanticObjectId, request: Request, current_receptionist: User = Depends(get_current_receptionist_user)):
     """
     Updates specific demographic fields of an existing patient.
 
@@ -80,8 +80,20 @@ async def update_patient(patient_id: PydanticObjectId, patient_data: PatientUpda
         The updated Patient document object.
 
     Raises:
-        HTTPException: If the patient ID does not exist in the database (HTTP 404).
+        HTTPException: If invalid fields are sent (HTTP 400) or if the patient ID does not exist (HTTP 404).
     """
+    
+    payload = await request.json()
+    allowed_fields = {"address", "companion", "phone_num", "sex"}
+    invalid_fields = [key for key in payload.keys() if key not in allowed_fields]
+    
+    if invalid_fields:
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail=f"Update failed. Unauthorized fields detected: {', '.join(invalid_fields)}"
+        )
+    
+    patient_data = PatientUpdate(**payload)
     
     try:
         updated_patient = await PatientService.update_patient(patient_id=patient_id, new_data=patient_data)
