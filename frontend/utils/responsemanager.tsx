@@ -19,7 +19,6 @@ export type responseManagerResponse = {
  */
 export default async function ResponseManager(res: Response) : Promise<responseManagerResponse> {
 
-    console.log("RESPONSE RESULT", res.status)
     if(res.ok)
     {
         let content = await res.text();
@@ -29,7 +28,7 @@ export default async function ResponseManager(res: Response) : Promise<responseM
         }
         catch(exception)
         {
-            console.log('Not valid JSON: ', exception)
+            console.log('Invalid JSON: ', exception)
         }
 
         return {
