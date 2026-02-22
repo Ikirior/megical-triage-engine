@@ -10,9 +10,9 @@ async function getUser(token:any)
 {
 
     type decoded = {sub: string}
-    console.log(token);
+
     const tokenContent = decode(token) as decoded;
-    console.log(tokenContent);
+
     const userInfo = await (await fetch(`http://backend_server:3001/users/${tokenContent.sub}`, {
         "headers": {
             "Authorization": await getTokenHeaderValue(),
@@ -24,8 +24,7 @@ async function getUser(token:any)
 }
 
 export default async function Login(initialState: responseManagerResponse, params: FormData) {
-    
-    console.log(params.get('name'), params.get('password'))
+
     const payload = {
         "username": params.get('id') as string,
         "password": params.get('password') as string
@@ -52,7 +51,14 @@ export default async function Login(initialState: responseManagerResponse, param
         //const res = NextResponse.next();
         //console.log((await headers()).get('referer'))
 
-        redirect('/');
+        if(userInfo.role == 'admin')
+            redirect('/adminpanel');
+        else if(userInfo.role == 'receptionist')
+            redirect('/patientregistry')
+        else if(userInfo.role == 'nurse')
+            redirect('/triagepanel')
+        else
+            redirect('/')
     }
 
     return resMan;
