@@ -30,7 +30,7 @@ async def test_nurse_can_start_triage(nurse_client, seed_service_sheet, seed_nur
     
     assert response.status_code == HTTPStatus.OK
     data = response.json()
-    assert data["status"] == "em_triagem"
+    assert data["status"] == "em_triagem_fase_1"
 
 
 @pytest.mark.asyncio
@@ -124,3 +124,38 @@ async def test_unauthenticated_access_is_blocked(guest_client, seed_service_shee
     """
     response = await guest_client.get("/triages/queue")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+    
+@pytest.mark.asyncio
+async def test_nurse_can_recover_triage_session(nurse_client, seed_service_sheet, seed_nurse):
+    """
+    Verifies that a nurse can successfully recover their active triage session,
+    simulating a frontend state restoration after a page reload.
+    """
+    sheet_id = str(seed_service_sheet.id)
+    
+    await nurse_client.post(f"/triages/{sheet_id}/start")
+    
+    response = await nurse_client.get(f"/triages/{sheet_id}/session")
+    
+    assert response.status_code == HTTPStatus.OK
+    data = response.json()
+    
+    assert data["status"] == "em_triagem_fase_1"
+    assert data["nurse_ref"] == str(seed_nurse.id)
+
+@pytest.mark.asyncio
+async def test_idor_protection_nurse_cannot_access_others_session(nurse_client, seed_service_sheet, seed_admin):
+    """
+    Strict AppSec Test: Validates that a user cannot fetch a session 
+    locked by a different staff member (IDOR prevention).
+    """
+    sheet_id = str(seed_service_sheet.id)
+    
+    from tests.conftest import get_authenticated_client
+    async with await get_authenticated_client(seed_admin) as temp_admin_client:
+        await temp_admin_client.post(f"/triages/{sheet_id}/start")
+    
+    response = await nurse_client.get(f"/triages/{sheet_id}/session")
+    
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert "not have access" in response.json()["detail"].lower()
