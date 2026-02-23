@@ -1,26 +1,18 @@
-import TriageSheet from "@/components/triagesheet/triagesheet";
-import style from '@/app/triagepanel/styles.module.css'
 import PathBar from "@/components/pathbar/pathbar";
-import MajorButton from "@/components/majorbutton/majorbutton";
-import { Send, Rocket, PlusIcon, MessageCircleQuestionIcon } from "lucide-react";
-import SingleButton from "@/components/singlebutton/singlebutton";
+import GetQeuePatients from "@/components/triagesheet/getQueuePatients";
+import TriagePanel from "@/components/triagesheet/triagepanel";
+import { queueObj } from "@/components/triagesheet/types";
 
-export default function Page() {
+export default async function Page() {
+
+  const patientQueue = await GetQeuePatients();
   return (<>
     <PathBar path="Triage Panel"></PathBar>
-    <h1 style={{"margin": "4vh 0 0 2vh", "fontSize": "2em"}}>&lt;Patient&gt;'s Triage Sheet</h1>
-    <div className={style.panel}>
-        <TriageSheet></TriageSheet>
-    </div>
-    <nav id="form-actions" className={[style.actions, style.form_actions].join(' ')}>
-      <MajorButton icon={<MessageCircleQuestionIcon/>} content="Generate Questions" ></MajorButton>
-      <MajorButton icon={<Rocket/>} content="Generate Analysis" ></MajorButton>
-      <MajorButton icon={<Send/>} content="Send to Queue" ></MajorButton>
-
-      <div className={style.plus_button}>
-        <SingleButton icon={<PlusIcon/>}/>
-      </div>
-    </nav>
+    {
+      patientQueue.content ?
+      <TriagePanel queue={patientQueue.content as queueObj[]}/> :
+      patientQueue.msg
+    }
   </>
   );
 }
