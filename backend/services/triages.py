@@ -1,7 +1,7 @@
 from datetime import datetime
 import asyncio
 from beanie import PydanticObjectId
-from beanie.operators import In, Set, Or
+from beanie.operators import In, Set, Or, And
 from fastapi import HTTPException
 from typing import Optional, List
 from models import User, Patient, ServiceSheet, TriageStatus
@@ -30,23 +30,37 @@ class TriageService:
     """
     
     @staticmethod
-    async def get_triage_queue() -> List[TriageQueueItem]:
+    async def get_triage_queue(nurse_id: PydanticObjectId) -> List[TriageQueueItem]:
         """
-        Retrieves the current queue of patients waiting for triage.
+        Retrieves the queue of patients waiting for triage and active sessions for the nurse.
 
-        Fetches active service sheets sorted by arrival time First-In-First-Out (FIFO) and uses 
-        batch processing to retrieve patient names via a highly performant 
-        O(1) memory map, preventing N+1 query bottlenecks.
+        Fetches active service sheets sorted by arrival time First-In-First-Out (FIFO).
+        The query uses logical operators to fetch:
+        1. All sheets globally waiting for triage.
+        2. Sheets currently in a triage phase strictly assigned to the requesting nurse.
+        
+        Uses batch processing to retrieve patient names via an O(1) memory map, 
+        preventing N+1 query bottlenecks.
+
+        Args:
+            nurse_id: The unique database ID of the nurse requesting the queue.
 
         Returns:
-            A list of TriageQueueItem objects representing the waiting patients.
+            A list of TriageQueueItem objects representing the waiting/active patients.
         """
         
-        sheets = await ServiceSheet.find(Or(
-            ServiceSheet.status == TriageStatus.aguardando_triagem,
-            ServiceSheet.status == TriageStatus.em_triagem_fase_1,
-            ServiceSheet.status == TriageStatus.em_triagem_fase_2,
-            ServiceSheet.status == TriageStatus.em_triagem_fase_3)
+        sheets = await ServiceSheet.find(
+            Or(
+                ServiceSheet.status == TriageStatus.aguardando_triagem,
+                And(
+                    ServiceSheet.nurse_ref == nurse_id,
+                    In(ServiceSheet.status, [
+                        TriageStatus.em_triagem_fase_1,
+                        TriageStatus.em_triagem_fase_2,
+                        TriageStatus.em_triagem_fase_3
+                    ])
+                )
+            )
         ).sort(ServiceSheet.created_at).to_list()
         
         if not sheets:
@@ -65,7 +79,8 @@ class TriageService:
                 sheet_id=sheet.id,
                 patient_id=sheet.patient_ref,
                 patient_name=patient_map.get(sheet.patient_ref, "Unknown"),
-                arrival_time=sheet.created_at
+                arrival_time=sheet.created_at,
+                status=sheet.status
             ))
         
         return queue
