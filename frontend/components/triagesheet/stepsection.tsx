@@ -4,7 +4,7 @@ import SidePanel from "./sidepanel";
 
 
 type stepsectionparams = {
-    currentStep: null|1|2|3
+    currentStep: number|null
 }
 
 const CONTENT = {
@@ -13,8 +13,8 @@ const CONTENT = {
         "next_step": <>During step 1, you'll fill in the <b>Essentials</b> (vitals) topic and add <b>Observations</b>.</>
     },
     1: {
-        "description": <>Fill in the<b>Essentials</b> and <b>Observations</b> fields.</>,
-        "next_step": <>Durin step 2, you'll receive question suggestions made by MedGemma.</>
+        "description": <>Fill in the <b>Essentials</b> and <b>Observations</b> fields.</>,
+        "next_step": <>During step 2, you'll receive question suggestions made by MedGemma.</>
     },
     2: {
         "description": "",
