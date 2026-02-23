@@ -3,51 +3,40 @@ import { useState } from "react";
 import styles from '@/components/triagesheet/triagesheet.module.css'
 import { ArrowLeft, CheckSquare2Icon, SquareArrowUpRight } from "lucide-react";
 import GetQeuePatients from "./getQueuePatients";
-import { queueObj } from "./types";
+import { queueObj, status } from "./types";
 import SingleButton from "../singlebutton/singlebutton";
 import SidePanel from "./sidepanel";
+import QueueElement from "./queueElement";
 
 
 type triagequeueparams = {
     setCurrentPatientInfo: Function,
-    currentPatientId: string|null,
+    currentSheetId: string|null,
     setStep: Function,
     queue: queueObj[]
 }
 
 export default function TriageQueue(params: triagequeueparams)
 {
+    const new_triages = params.queue.filter((value)=>value.status == 'aguardando_triagem');
+    const other = params.queue.filter((value) => value.status != 'aguardando_triagem')
 
-    return <SidePanel position="left" text="Patient Triage Queue">
+    return <SidePanel position="left">
+        <h1 style={{fontSize: "1.3em"}}>Patient Triage Queue</h1>
         {
-            params.queue.length > 0 ?
+            new_triages.length > 0 ?
                 <div>
-                    {...params.queue.map((value, index) => 
-                        <div className={styles.queueObj}>
-                            <div>{index+1}</div>
-                            <div>
-                                <div>{value.patient_name}</div>
-                                <div className={styles.queueObj_date}>{new Date(value.arrival_time).toLocaleTimeString()}</div>
-                            </div>
-                            <form>
-                                <input value={value.sheet_id} name="sheet_id" readOnly style={{display: 'none'}}/>
-                                {
-                                    params.currentPatientId != value.patient_id ?
-                                        <SingleButton icon={<SquareArrowUpRight/>} clientFormFunction={
-                                            async (args) => {
-                                                const sheet_id = args.get('sheet_id');
-                                                params.setCurrentPatientInfo({"sheet_id": sheet_id, "patient_id": value.patient_id});
-                                                params.setStep(1);
-                                            }
-                                        } submit={true} backgroudColor="transparent" title="Start User Triage"/>
-                                        :
-                                        <CheckSquare2Icon color="green"/>
-                                }
-                            </form>
-                        </div>
-                    )}
+                    {...new_triages.map((value, index) => <QueueElement currentSheetId={params.currentSheetId} value={value} index={index} setCurrentPatientInfo={params.setCurrentPatientInfo} setStep={params.setStep}/>)}
                 </div> :
-                <div>No users yet in queue!</div>
+                <div>No patients yet in queue!</div>
+        }
+        <h1 style={{fontSize: "1.3em", marginTop: "3vh", borderTop: "thin grey solid", paddingTop: "1vh"}}>Continue Editing</h1>
+        {
+            other.length > 0 ?
+                <div>
+                    {...other.map((value, index) => <QueueElement currentSheetId={params.currentSheetId} value={value} index={index} setCurrentPatientInfo={params.setCurrentPatientInfo} setStep={params.setStep} continueEditing/>)}
+                </div> :
+                <div>No patients to continue editing. </div>
         }
     </SidePanel>;
 }
