@@ -11,7 +11,9 @@ type singlebutton_params = {
     action?: Function,
     submit?: boolean,
     formAction?: (initialState:responseManagerResponse, args:FormData) => Promise<responseManagerResponse>,
-    title?: string
+    title?: string,
+    clientFormFunction?: (args: FormData) => void,
+    alternativeStyle?: boolean
 }
 
 export default function SingleButton(params: singlebutton_params)
@@ -37,9 +39,23 @@ export default function SingleButton(params: singlebutton_params)
     return (
         <>
             {...error_msg}
-            <button className={styles.button} style={styles_obj} title={params?.title} formAction={action_func} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
-                {params.icon}
-                {params.text}
+            <button className={params.alternativeStyle ? styles.alt_button : styles.button} style={styles_obj} title={params?.title} formAction={action_func ?? params.clientFormFunction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
+                
+                {
+                    !params.alternativeStyle ?
+                    <>
+                        {params.icon}
+                        {params.text}
+                    </> :
+                    <>
+                        <div className={styles.alt_figure}>
+                            {params.icon}
+                        </div>
+                        <div className={styles.alt_text}>{params.text}</div>
+                    </>
+
+                }
+
             </button>
         </>
     )
