@@ -1,7 +1,7 @@
 from datetime import datetime
 import asyncio
 from beanie import PydanticObjectId
-from beanie.operators import In, Set
+from beanie.operators import In, Set, Or
 from fastapi import HTTPException
 from typing import Optional, List
 from models import User, Patient, ServiceSheet, TriageStatus
@@ -42,8 +42,11 @@ class TriageService:
             A list of TriageQueueItem objects representing the waiting patients.
         """
         
-        sheets = await ServiceSheet.find(
-            ServiceSheet.status == TriageStatus.aguardando_triagem
+        sheets = await ServiceSheet.find(Or(
+            ServiceSheet.status == TriageStatus.aguardando_triagem,
+            ServiceSheet.status == TriageStatus.em_triagem_fase_1,
+            ServiceSheet.status == TriageStatus.em_triagem_fase_2,
+            ServiceSheet.status == TriageStatus.em_triagem_fase_3)
         ).sort(ServiceSheet.created_at).to_list()
         
         if not sheets:
@@ -82,8 +85,10 @@ class TriageService:
         
         number_of_sheets = await ServiceSheet.find(
             In(ServiceSheet.status, [
-                TriageStatus.aguardando_triagem, 
-                TriageStatus.em_triagem
+                TriageStatus.aguardando_triagem,
+                TriageStatus.em_triagem_fase_1,
+                TriageStatus.em_triagem_fase_2,
+                TriageStatus.em_triagem_fase_3
             ])
         ).count()
         
@@ -107,7 +112,8 @@ class TriageService:
         Locks a patient in the triage queue and assigns them to a specific nurse.
 
         Validates the current state of the service sheet to prevent concurrent 
-        triage attempts. Modifies the status to 'em_triagem' and attaches the nurse ID.
+        triage attempts. Modifies the status to 'em_triagem_fase_1' and attaches 
+        the nurse's unique ID.
 
         Args:
             sheet_id: The unique database ID of the service sheet.
@@ -142,14 +148,15 @@ class TriageService:
             raise PatientNotFoundError("Associated patient record not found.")
         
         await sheet.update(Set({
-                    ServiceSheet.status: TriageStatus.em_triagem,
+                    ServiceSheet.status: TriageStatus.em_triagem_fase_1,
                     ServiceSheet.nurse_ref: nurse_id
                 }))
         
         return ServiceSheetDetail(
             id=sheet.id,
             patient=PatientCreate(**patient.model_dump()),
-            status=TriageStatus.em_triagem,
+            status=TriageStatus.em_triagem_fase_1,
+            nurse_ref=nurse_id,
             created_at=sheet.created_at,
             triage_data=sheet.triage_data,
             doctor_data=sheet.doctor_data
@@ -161,17 +168,18 @@ class TriageService:
         Executes Phase 1 of the triage process: Initial data and AI query generation.
 
         Stores the nurse's initial observations and patient vitals. Gathers clinical
-        history and unit crowding context to orchestrate the MedGemma AI.
+        history and unit crowding context to orchestrate the MedGemma AI. Advances
+        the state machine to Phase 2.
 
         Args:
             sheet_id: The unique database ID of the service sheet.
             input_data: A TriageDataPhaseOne schema containing vitals and initial notes.
 
         Returns:
-            A list of generated TriageInvestigationQA objects.
+            A list of generated TriageInvestigationQA objects containing the AI's questions.
             
         Raises:
-            ServiceSheetNotFoundError: If the sheet record does not exist.
+            ServiceSheetNotFoundError: If the service sheet record does not exist.
         """
         
         sheet = await ServiceSheet.get(sheet_id)
@@ -191,7 +199,8 @@ class TriageService:
         
         triage_data.investigation_qa = triage_questions
         
-        await sheet.update(Set({ServiceSheet.triage_data: triage_data}))
+        await sheet.update(Set({ServiceSheet.triage_data: triage_data,
+                                ServiceSheet.status: TriageStatus.em_triagem_fase_2}))
         
         return triage_questions
     
@@ -205,7 +214,8 @@ class TriageService:
 
         Args:
             sheet_id: The unique database ID of the service sheet.
-            input_data: A TriageDataPhaseTwo schema containing the answered questions.
+            input_data: A TriageDataPhaseTwo schema containing the answered questions. Advances
+            the state machine to Phase 3.
 
         Returns:
             A string containing the AI-generated diagnostic hypothesis.
@@ -235,7 +245,8 @@ class TriageService:
         
         triage_data.ai_generated_sugestion = ai_observation
         
-        await sheet.update(Set({ServiceSheet.triage_data: triage_data}))
+        await sheet.update(Set({ServiceSheet.triage_data: triage_data,
+                                ServiceSheet.status: TriageStatus.em_triagem_fase_3}))
         
         return ai_observation
     
@@ -282,3 +293,39 @@ class TriageService:
         asyncio.create_task(MedGemmaProvider.generate_doctor_summary(sheet))
         
         return True
+
+    @staticmethod
+    async def get_triage_session(sheet_id: PydanticObjectId) -> ServiceSheetDetail:
+        """
+        Retrieves the exact current state of a triage session.
+
+        Allows the frontend to recover the triage form at the exact phase 
+        it was interrupted (e.g., during page reloads or network drops).
+
+        Args:
+            sheet_id: The unique database ID of the service sheet.
+
+        Returns:
+            A populated ServiceSheetDetail DTO containing the current status and partial data.
+
+        Raises:
+            ServiceSheetNotFoundError: If the sheet record does not exist.
+            PatientNotFoundError: if the patient record does not exist.
+        """
+        sheet = await ServiceSheet.get(sheet_id)
+        if not sheet:
+            raise ServiceSheetNotFoundError(f"Service sheet {sheet_id} not found.")
+            
+        patient = await Patient.get(sheet.patient_ref)
+        if not patient:
+            raise PatientNotFoundError("Associated patient record not found.")
+
+        return ServiceSheetDetail(
+            id=sheet.id,
+            patient=PatientCreate(**patient.model_dump()),
+            status=sheet.status,
+            nurse_ref=sheet.nurse_ref,
+            created_at=sheet.created_at,
+            triage_data=sheet.triage_data,
+            doctor_data=sheet.doctor_data
+        )
