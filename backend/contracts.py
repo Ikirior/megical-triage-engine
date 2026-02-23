@@ -109,6 +109,7 @@ class TriageQueueItem(BaseModel):
     patient_id: PydanticObjectId
     patient_name: str
     arrival_time: datetime
+    status: TriageStatus
 
 class DoctorQueueItem(BaseModel):
     id: PydanticObjectId
