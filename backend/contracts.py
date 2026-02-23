@@ -19,7 +19,9 @@ class SexEnum(str, Enum):
 
 class TriageStatus(str, Enum):
     aguardando_triagem = "aguardando_triagem"
-    em_triagem = "em_triagem"
+    em_triagem_fase_1 = "em_triagem_fase_1"
+    em_triagem_fase_2 = "em_triagem_fase_2"
+    em_triagem_fase_3 = "em_triagem_fase_3"
     aguardando_medico = "aguardando_medico"
     em_atendimento = "em_atendimento"
     finalizado = "finalizado"
@@ -143,6 +145,7 @@ class ServiceSheetResponse(BaseModel):
 class ServiceSheetDetail(BaseModel):
     id: PydanticObjectId
     patient: PatientCreate
+    nurse_ref: PydanticObjectId
     status: TriageStatus
     created_at: datetime
     triage_data: Optional[TriageData] = None
