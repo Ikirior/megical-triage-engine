@@ -31,7 +31,7 @@ async def get_triage_queue(current_nurse: User = Depends(get_current_nurse_user)
         A list of TriageQueueItem objects representing patients awaiting service.
     """
     
-    queue = await TriageService.get_triage_queue()
+    queue = await TriageService.get_triage_queue(nurse_id=current_nurse.id)
     return queue
 
 @router.post("/{sheet_id}/start", response_model=ServiceSheetDetail)
