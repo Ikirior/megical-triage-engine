@@ -14,6 +14,5 @@ export default async function DeleteUser(initialState: responseManagerResponse, 
     })
     let res = delReq.status;
 
-    console.log('deleted');
     return ResponseManager(delReq)
 }
