@@ -14,7 +14,7 @@ from services.triages import TriageService
 from exceptions import (
     ServiceSheetNotFoundError, NurseNotFoundError, 
     PatientNotFoundError, InvalidTriageStateError, 
-    IncompleteTriageDataError
+    IncompleteTriageDataError,
 )
 
 router = APIRouter(prefix="/triages", tags=["triage_management"])
@@ -155,5 +155,50 @@ async def execute_part_three(sheet_id: PydanticObjectId, input_data: TriageDataP
     except IncompleteTriageDataError as e:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.get("/{sheet_id}/session", response_model=ServiceSheetDetail)
+async def get_triage_session(sheet_id: PydanticObjectId, current_nurse: User = Depends(get_current_nurse_user)):
+    """
+    Retrieves the current state of an active triage session for state recovery.
+
+    Provides the frontend with the exact phase and partial data of a triage 
+    in progress, preventing data loss during page reloads. Enforces strict 
+    authorization to prevent Insecure Direct Object Reference (IDOR) vulnerabilities.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet to recover.
+        current_nurse: The authenticated nurse, injected by dependency.
+
+    Returns:
+        The requested ServiceSheetDetail document containing the current status
+        and any saved triage data.
+
+    Raises:
+        HTTPException: If the session belongs to a different nurse (HTTP 401),
+                       if the service sheet is not found (HTTP 404), or if the
+                       associated patient is not found (HTTP 404).
+    """
+    
+    try:
+        session_data = await TriageService.get_triage_session(sheet_id=sheet_id)
+        
+        if session_data.nurse_ref != current_nurse.id:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail="Nurse trying to access data that he does not have access to."
+            )
+        
+        return session_data
+    
+    except ServiceSheetNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
+    except PatientNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
             detail=str(e)
         )
