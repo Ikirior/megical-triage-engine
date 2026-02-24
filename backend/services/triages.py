@@ -8,7 +8,7 @@ from models import User, Patient, ServiceSheet, TriageStatus
 from contracts import (
     TriageDataPhaseOne, TriageDataPhaseTwo,
     TriageDataPhaseThree, TriageInvestigationQA, UnityContextSnapshot,
-    TriageQueueItem, ServiceSheetDetail, TriageData, PatientCreate)
+    TriageQueueItem, ServiceSheetDetail, TriageData, PatientCreate, DoctorData)
 from services.patients import PatientService
 from services.medgemma import MedGemmaProvider
 from exceptions import (
@@ -256,7 +256,7 @@ class TriageService:
         
         unity_history = await TriageService._calculate_unit_context()
         
-        ai_observation = await MedGemmaProvider.generate_medical_suggestion(triage_data=triage_data, patient_history=patient_history, unity_history=unity_history)
+        ai_observation = await MedGemmaProvider.generate_clinical_suggestion(triage_data=triage_data, patient_history=patient_history, unity_history=unity_history)
         
         triage_data.ai_generated_suggestion = ai_observation
         
@@ -264,6 +264,27 @@ class TriageService:
                                 ServiceSheet.status: TriageStatus.em_triagem_fase_3}))
         
         return ai_observation
+    
+    @staticmethod
+    async def _generate_and_save_doctor_summary(sheet_id: PydanticObjectId, sheet_details: ServiceSheetDetail):
+        """
+        Background task wrapper. Calls the LLM to generate the summary
+        and persists the generated string into the database.
+        """
+        try:
+            summary = await MedGemmaProvider.generate_doctor_summary(sheet_details)
+            
+            sheet = await ServiceSheet.get(sheet_id)
+            if sheet:
+                
+                if not sheet.doctor_data:
+                    sheet.doctor_data = DoctorData(doctor_notes="")
+                
+                sheet.doctor_data.ai_pre_consultation_summary = summary
+                await sheet.save()
+                
+        except Exception as e:
+            print(f"Failed to generate/save doctor summary in background for sheet {sheet_id}: {e}")
     
     @staticmethod
     async def execute_phase_three(sheet_id: PydanticObjectId, input_data: TriageDataPhaseThree) -> bool:
@@ -294,9 +315,15 @@ class TriageService:
         if not sheet.triage_data:
             raise IncompleteTriageDataError("Previous triage data is missing. Cannot finalize Phase 3.")
         
+        patient = await Patient.get(sheet.patient_ref)
+        
+        if not patient:
+            raise PatientNotFoundError("Associated patient record not found. Cannot mount details.")
+        
         triage_data = sheet.triage_data
         
         update_dict = input_data.model_dump(exclude_unset=True)
+        
         for key, value in update_dict.items():
             setattr(triage_data, key, value)
         
@@ -305,7 +332,17 @@ class TriageService:
             ServiceSheet.status: TriageStatus.aguardando_medico
         }))
         
-        asyncio.create_task(MedGemmaProvider.generate_doctor_summary(sheet))
+        sheet_details = ServiceSheetDetail(
+            id=sheet.id,
+            patient=PatientCreate(**patient.model_dump()),
+            nurse_ref=sheet.nurse_ref,
+            status=TriageStatus.aguardando_medico,
+            created_at=sheet.created_at,
+            triage_data=triage_data,
+            doctor_data=sheet.doctor_data
+        )
+        
+        asyncio.create_task(MedGemmaProvider.generate_doctor_summary(sheet_details))
         
         return True
 
