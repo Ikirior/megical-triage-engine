@@ -2,6 +2,7 @@
 
 import getTokenHeaderValue from "@/utils/getTokenHeader";
 import ResponseManager, { responseManagerResponse } from "@/utils/responsemanager";
+import { redirect } from "next/navigation";
 
 export default async function FinishStepThree(initialState: responseManagerResponse, args: FormData) {
 
@@ -21,6 +22,11 @@ export default async function FinishStepThree(initialState: responseManagerRespo
             'Content-Type': 'application/json'
         }
     })
+
+    if(res.ok)
+    {
+        redirect('/triagepanel');
+    }
 
    return ResponseManager(res)
 }
