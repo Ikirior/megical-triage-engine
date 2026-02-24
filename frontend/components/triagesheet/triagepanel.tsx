@@ -25,7 +25,7 @@ export default function TriagePanel(params: triagepanelparams)
     return <div className={styles.panel}>
         <h1 style={{"margin": "4vh 0 0 2vh", "fontSize": "2em"}}>Patient's Triage Sheet</h1>
         <TriageSheet user_role="nurse" current_sheet_id={current_patient_info.sheet_id} current_step={current_step} set_step={setStep}></TriageSheet>
-        <TriageQueue queue={params.queue} setCurrentPatientInfo={setCurrentPatientInfo} currentSheetId={current_patient_info.sheet_id} setStep={setStep}/>
+        <TriageQueue user_role="nurse" queue={params.queue} setCurrentPatientInfo={setCurrentPatientInfo} currentSheetId={current_patient_info.sheet_id} setStep={setStep}/>
         <StepSection currentStep={current_step}/>
     </div>
 }

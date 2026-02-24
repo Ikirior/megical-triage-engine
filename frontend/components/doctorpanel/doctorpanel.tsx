@@ -23,6 +23,6 @@ export default function DoctorPanel(params: doctorPanelParams)
     return <div className={styles.panel}>
         <h1 style={{"margin": "4vh 0 0 2vh", "fontSize": "2em"}}>Patient's Service Sheet</h1>
         <TriageSheet user_role='doctor' current_sheet_id={current_patient_info.sheet_id} current_step={current_step} set_step={setStep}></TriageSheet>
-        <TriageQueue queue={params.queue} setCurrentPatientInfo={setCurrentPatientInfo} currentSheetId={current_patient_info.sheet_id} setStep={setStep}/>
+        <TriageQueue user_role="doctor" queue={params.queue} setCurrentPatientInfo={setCurrentPatientInfo} currentSheetId={current_patient_info.sheet_id} setStep={setStep}/>
     </div>
 }
