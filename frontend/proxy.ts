@@ -41,7 +41,8 @@ export async function proxy(req: NextRequest)
             if(
                 (urlPath.startsWith('/adminpanel') && decoded.role != 'admin') ||
                 (urlPath.startsWith('/triagepanel') && decoded.role != 'nurse') ||
-                (urlPath.startsWith('/patientregistry') && decoded.role != 'receptionist')  
+                (urlPath.startsWith('/patientregistry') && decoded.role != 'receptionist') ||
+                (urlPath.startsWith('/doctorpanel') && decoded.role != 'doctor')
             )
             {
                 console.log('<!> Proxy access redirected for insufficient role.')
@@ -58,5 +59,5 @@ export async function proxy(req: NextRequest)
 }
 
 export const config = {
-    matcher: ["/triagepanel/:path*", "/adminpanel/:path*", "/patientregistry/:path*"]
+    matcher: ["/triagepanel/:path*", "/adminpanel/:path*", "/patientregistry/:path*", "/doctorpanel/:path*"]
 }
