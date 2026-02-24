@@ -30,7 +30,7 @@ export default async function Home() {
   return (
     <main className={styles.home}>
         <div>Welcome to</div>
-        <h1>Megical Assistant</h1>
+        <h1>Megical: Triage Engine</h1>
         <h2>An application designed to facilitate the management of patients and medical workflow.</h2>
         <div className={styles.buttons}>
           {
