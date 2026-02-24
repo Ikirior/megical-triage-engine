@@ -12,6 +12,7 @@ import FinishStepOne from './sheet_actions/FinishStepOne';
 import FinishStepTwo from './sheet_actions/FinishStepTwo';
 import FinishStepThree from './sheet_actions/FinishStepThree';
 import Finish from '../doctorpanel/finish';
+import { responseManagerResponse } from '@/utils/responsemanager';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,
@@ -22,11 +23,10 @@ type triagesheetparams = {
 
 export default function TriageSheet(params: triagesheetparams)
 {
-    const [triageSheet, setTriageSheet] = useState(null as ServiceSheet|null)
-    const [extraVitalFields, setExtraVitalFields] = useState([] as JSX.Element[])
+    const [triageSheet, setTriageSheet] = useState(null as ServiceSheet|null);
+    const [extraVitalFields, setExtraVitalFields] = useState([] as JSX.Element[]);
 
-    // If the patient id changes, reload the page with the current content you may find.
-    useEffect(() => {
+    const loadTriageSheet = () => {
         console.log('Updating Service Sheet for ', params.current_sheet_id);
         
             const loadTriageSheet = async () =>
@@ -69,7 +69,15 @@ export default function TriageSheet(params: triagesheetparams)
             }
             loadTriageSheet();
 
-    }, [params.current_sheet_id]);
+    };
+
+    // If the patient id changes, reload the page with the current content you may find.
+    useEffect(loadTriageSheet, [params.current_sheet_id]);
+
+    // Temporary Solution (due to time contraint)
+    const ReloadWrapper = (callback: (initialState: responseManagerResponse, args: FormData) => Promise<responseManagerResponse>) =>{
+        return (value:FormData) => callback({} as responseManagerResponse, value).then(()=>{loadTriageSheet();})
+    }
     
     // The ServiceSheet is one huge form.
     // It is divided into sections, treated by the form with a fieldset.
@@ -151,7 +159,7 @@ export default function TriageSheet(params: triagesheetparams)
                 {
                     params.user_role == 'nurse' && params.current_step == 1 &&
                     <>
-                        <SingleButton icon={<MessageCircleQuestionIcon/>} text="Generate Questions" alternativeStyle formAction={FinishStepOne} submit/>
+                        <SingleButton icon={<MessageCircleQuestionIcon/>} text="Generate Questions" alternativeStyle clientFormFunction={ReloadWrapper(FinishStepOne)} submit/>
                         <div className={styles.plus_button}>
                             <SingleButton icon={<PlusIcon/>} action={() => {
                                 setExtraVitalFields([...extraVitalFields, <Field name={'EXTRA-' + extraVitalFields.length} key_name='New Field' current_sheet_id={params.current_sheet_id ?? ''} value=''></Field>])
@@ -162,19 +170,19 @@ export default function TriageSheet(params: triagesheetparams)
                 {
                     params.user_role == 'nurse' && params.current_step == 2 &&
                     <>
-                        <SingleButton icon={<Rocket/>} text="Generate Analysis"  alternativeStyle formAction={FinishStepTwo} submit/>
+                        <SingleButton icon={<Rocket/>} text="Generate Analysis"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepTwo)} submit/>
                     </>
                 }
                 {
                     params.user_role == 'nurse' && params.current_step == 3 &&
                     <>
-                        <SingleButton icon={<Send/>} text="Send to Queue"  alternativeStyle formAction={FinishStepThree} submit/>
+                        <SingleButton icon={<Send/>} text="Send to Queue"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepThree)} submit/>
                     </>
                 }
                 {
                     params.user_role == 'doctor' &&
                     <>
-                        <SingleButton icon={<Send/>} text="Finish"  alternativeStyle formAction={Finish} submit/>
+                        <SingleButton icon={<Send/>} text="Finish"  alternativeStyle clientFormFunction={ReloadWrapper(Finish)} submit/>
                     </>
                 }
 
