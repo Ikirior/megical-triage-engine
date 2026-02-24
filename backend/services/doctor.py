@@ -121,9 +121,12 @@ class DoctorService:
         if not patient:
             raise PatientNotFoundError("Patient record not found.")
         
+        temp_doctor_data = DoctorData(ai_pre_consultation_summary="batata doce, doce, doce, doce, doce")
+        
         await sheet.update(Set({
             ServiceSheet.status: TriageStatus.em_atendimento,
-            ServiceSheet.doctor_ref: doctor_id
+            ServiceSheet.doctor_ref: doctor_id,
+            ServiceSheet.doctor_data: temp_doctor_data # Temporary
         }))
         
         return ServiceSheetDetail(
