@@ -3,7 +3,7 @@
 {
     position: relative;
     display: flex;
-    padding: 2vh;
+    height: fit-content;
 }
 
 /*Triage Sheet -------------------------------------------------------*/
@@ -17,7 +17,7 @@
 
     --height: 125vh;
     width: calc(var(--height)*0.7);
-    height: var(--height); /* A4 sheet propottions: 1102 (w) /1560 (h) = 0.70641025641 */
+    min-height: var(--height); /* A4 sheet propottions: 1102 (w) /1560 (h) = 0.70641025641 */
     background-color: white;
     box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.342);
     margin-bottom: 2vh;
@@ -50,29 +50,77 @@
 .field
 {
     display: grid;
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 30% 70%;
     width: 50%;
     height: fit-content;
 }
 .field > *
 {
     border: solid thin black;
+    border-left: none;
+    border-top: none;
     width: 100%;
-    text-align: center;
+    text-align: left;
+    padding: 4px;
     margin: auto;
+    margin: 2px;
+}
+
+.ai_question 
+{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 4px;
+    background-image: linear-gradient(90deg, #CEF4FA, #FFD8D8);
+    margin: 4px;
+    position: relative;
+}
+.ai_question > *
+{
+    padding: inherit;
+}
+.ai_question > input:last-child
+{
+    background-color: white;
+}
+
+.ai_button
+{
+    position: absolute;
+    right: 4px;
+    cursor: pointer;
+}
+
+.ai_reasoning
+{
+    position: absolute;
+    top: 2.5em;
+    right: -2px;
+    background-color: white;
+    border: #CEF4FA medium solid; 
+    box-shadow: 3px 3px 3px 3px #46464648;
+    z-index: 1;
+}
+
+.textarea
+{
+    resize: none;
+    width: 100%;
+    min-height: 7vh;
+    padding: 4px;
 }
 
 /* Queue ----------------------------------------------------------*/
 
 .queue_panel
 {
+    position: fixed;
     display: flex;
     flex-direction: row;
     background-color: #D7D8D9;
     border-radius: 10px;
     height: 100%;
-    margin: 2vh 0;
-    position: absolute;
     align-items: center;
     justify-content: flex-start;
     transition: all 500ms;
@@ -193,11 +241,9 @@
 .panel
 {
     align-items: center;
-    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    margin-top: 1vh;
 
 }
 

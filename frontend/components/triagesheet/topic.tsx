@@ -2,7 +2,7 @@ import styles from '@/components/triagesheet/triagesheet.module.css'
 
 type topic_params = {
     name: string,
-    children?: React.ReactNode
+    children?: React.ReactNode,
 }
 
 export default function Topic(params: topic_params)

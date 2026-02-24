@@ -11,18 +11,6 @@ const CONTENT = {
     0:{
         "description": <>Start by choosing a triage from the <b>queue</b>. The <b>queue</b> contains both the information of patients who are waiting for their triage to start, but also of those whose triage has started, but was left unfinished.</>,
         "next_step": <>During step 1, you'll fill in the <b>Essentials</b> (vitals) topic and add <b>Observations</b>.</>
-    },
-    1: {
-        "description": <>Fill in the <b>Essentials</b> and <b>Observations</b> fields.</>,
-        "next_step": <>During step 2, you'll receive question suggestions made by MedGemma.</>
-    },
-    2: {
-        "description": "",
-        "next_step": ""
-    },
-    3: {
-        "description": "",
-        "next_step": ""
     }
 }
 
