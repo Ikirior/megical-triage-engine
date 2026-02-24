@@ -1,4 +1,3 @@
-import { colors } from "@/utils"
 import styles from "@/components/pathbar/pathbar.module.css"
 
 type params_type = {

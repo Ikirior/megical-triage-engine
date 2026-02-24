@@ -1,11 +1,14 @@
 .pathbar
 {
+    position: sticky;
     display: flex;
+    top: 0px;
     flex-direction: row;
     width: 100%;
     padding: 10px;
     height: 4vh;
     font-size: 0.75em;
     background-color: #34567C;
+    z-index: 9;
     color: white;
 }
