@@ -253,7 +253,7 @@ OUTPUT REQUIREMENTS:
 - All text MUST be in professional Brazilian Portuguese (PT-BR).
 
 CLINICAL CONTEXT:
-{contexto_completo}
+{full_context}
 
 NEW INVESTIGATION ANSWERS (Phase 1):
 {answers_phase_one}
@@ -331,8 +331,8 @@ Final Constraint: Output ONLY the raw JSON object. Do not include any conversati
 
         if hasattr(triage_data, 'ai_generated_suggestion') and triage_data.ai_generated_suggestion:
             context_parts.append(f"AI Generated Clinical Suggestions: {triage_data.ai_generated_suggestion}")
-        elif hasattr(triage_data, 'ai_generated_suggestion') and triage_data.ai_generated_suggestion:
-            context_parts.append(f"AI Generated Clinical Suggestions: {triage_data.ai_generated_suggestion}")
+        elif hasattr(triage_data, 'ai_generated_sugestion') and triage_data.ai_generated_sugestion:
+            context_parts.append(f"AI Generated Clinical Suggestions: {triage_data.ai_generated_sugestion}")
 
         context_parts.append(f"Final Risk Classification: {triage_data.risk_classification.upper() if triage_data.risk_classification else 'N/A'}")
 

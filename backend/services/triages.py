@@ -342,7 +342,7 @@ class TriageService:
             doctor_data=sheet.doctor_data
         )
         
-        asyncio.create_task(MedGemmaProvider.generate_doctor_summary(sheet_details))
+        asyncio.create_task(TriageService._generate_and_save_doctor_summary(sheet_id=sheet.id, sheet_details=sheet_details))
         
         return True
 
