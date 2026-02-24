@@ -26,7 +26,7 @@ async def get_doctor_queue(current_doctor: User = Depends(get_current_doctor_use
         A list of patients waiting for medical consultation, sorted by risk.
     """
     
-    queue = await DoctorService.get_doctor_queue()
+    queue = await DoctorService.get_doctor_queue(current_doctor.id)
     return queue
 
 @router.post("/{sheet_id}/start", response_model=ServiceSheetDetail)
@@ -91,3 +91,48 @@ async def finish_consultation(sheet_id: PydanticObjectId, input_data: DoctorData
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
     except UnauthorizedDoctorError as e:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(e))
+
+@router.get("/{sheet_id}/session", response_model=ServiceSheetDetail)
+async def get_triage_session(sheet_id: PydanticObjectId, current_doctor: User = Depends(get_current_doctor_user)):
+    """
+    Retrieves the current state of an active triage session for state recovery.
+
+    Provides the frontend with the exact phase and partial data of a triage 
+    in progress, preventing data loss during page reloads. Enforces strict 
+    authorization to prevent Insecure Direct Object Reference (IDOR) vulnerabilities.
+
+    Args:
+        sheet_id: The unique PydanticObjectId of the service sheet to recover.
+        current_doctor: The authenticated doctor, injected by dependency.
+
+    Returns:
+        The requested ServiceSheetDetail document containing the current status
+        and any saved triage data.
+
+    Raises:
+        HTTPException: If the session belongs to a different doctor (HTTP 401),
+                       if the service sheet is not found (HTTP 404), or if the
+                       associated patient is not found (HTTP 404).
+    """
+    
+    try:
+        session_data = await DoctorService.get_triage_session(sheet_id=sheet_id)
+        
+        if session_data.doctor_ref != current_doctor.id:
+            raise HTTPException(
+                status_code=HTTPStatus.UNAUTHORIZED,
+                detail="Doctor trying to access data that he does not have access to."
+            )
+        
+        return session_data
+    
+    except ServiceSheetNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
+    except PatientNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
