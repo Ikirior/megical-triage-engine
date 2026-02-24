@@ -1,0 +1,36 @@
+.nav
+{
+    position: sticky;
+    top: 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 6vh;
+    padding: 10px;
+    background-color: var(--midtone);
+    color: white;
+    z-index: 1;
+    margin-bottom: 4vh;
+}
+
+.side
+{
+    position: absolute;
+    bottom: -0.5em;
+    background-color: var(--shadow);
+    min-width: 5vw;
+    display: flex;
+    flex-direction: column;
+}
+
+.side > *
+{
+    cursor: pointer;
+}
+
+.userprofile
+{
+    cursor: pointer;
+}
