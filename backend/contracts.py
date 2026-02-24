@@ -134,7 +134,7 @@ class TriageData(BaseModel):
 
 class DoctorData(BaseModel):
     ai_pre_consultation_summary: Optional[str] = None
-    doctor_notes:str
+    doctor_notes: Optional[str] = None
     diagnosis_cid: Optional[str] = None
     prescription: Optional[str] = None
 
