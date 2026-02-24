@@ -45,6 +45,7 @@
     width: inherit;
     height: fit-content;
     flex-wrap: wrap;
+    min-height: 7vh;
 }
 
 .field
@@ -107,8 +108,7 @@
 {
     resize: none;
     width: 100%;
-    min-height: 5vh;
-    min-height: 7vh;
+    min-height: 10vh;
     padding: 4px;
 }
 
