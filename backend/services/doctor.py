@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 from beanie import PydanticObjectId
-from beanie.operators import In, Set
+from beanie.operators import In, Set, Or, And
 
 from models import ServiceSheet, Patient, User
 from contracts import (
@@ -24,7 +24,7 @@ class DoctorService:
     """
     
     @staticmethod
-    async def get_doctor_queue() -> List[DoctorQueueItem]:
+    async def get_doctor_queue(doctor_id: PydanticObjectId) -> List[DoctorQueueItem]:
         """
         Retrieves the medical queue prioritized by clinical risk and waiting time.
 
@@ -38,7 +38,13 @@ class DoctorService:
         """
         
         sheets = await ServiceSheet.find(
-            ServiceSheet.status == TriageStatus.aguardando_medico
+            Or(
+                ServiceSheet.status == TriageStatus.aguardando_medico,
+                And(
+                    ServiceSheet.doctor_ref == doctor_id,
+                    ServiceSheet.status == TriageStatus.em_atendimento
+                )
+            )
         ).to_list()
         
         if not sheets:
@@ -67,9 +73,11 @@ class DoctorService:
             risk = sheet.triage_data.risk_classification if sheet.triage_data and sheet.triage_data.risk_classification else "azul"
             
             queue.append(DoctorQueueItem(
-                id=sheet.id,
+                sheet_id=sheet.id,
+                patient_id=sheet.patient_ref,
                 patient_name=patient_map.get(sheet.patient_ref, "Unknown"),
                 risk_classification=risk,
+                status=sheet.status,
                 waiting_since=sheet.created_at
             ))
         
@@ -121,6 +129,7 @@ class DoctorService:
         return ServiceSheetDetail(
             id=sheet.id,
             patient=PatientCreate(**patient.model_dump()),
+            nurse_ref=sheet.nurse_ref,
             status=TriageStatus.em_atendimento,
             created_at=sheet.created_at,
             triage_data=sheet.triage_data,
@@ -172,8 +181,46 @@ class DoctorService:
         return ServiceSheetDetail(
             id=sheet.id,
             patient=PatientCreate(**patient.model_dump()),
+            nurse_ref=sheet.nurse_ref,
             status=TriageStatus.finalizado,
             created_at=sheet.created_at,
             triage_data=sheet.triage_data,
             doctor_data=input_data
+        )
+
+    @staticmethod
+    async def get_triage_session(sheet_id: PydanticObjectId) -> ServiceSheetDetail:
+        """
+        Retrieves the exact current state of a triage session.
+
+        Allows the frontend to recover the triage form at the exact phase 
+        it was interrupted (e.g., during page reloads or network drops).
+
+        Args:
+            sheet_id: The unique database ID of the service sheet.
+
+        Returns:
+            A populated ServiceSheetDetail DTO containing the current status and partial data.
+
+        Raises:
+            ServiceSheetNotFoundError: If the sheet record does not exist.
+            PatientNotFoundError: if the patient record does not exist.
+        """
+        sheet = await ServiceSheet.get(sheet_id)
+        if not sheet:
+            raise ServiceSheetNotFoundError(f"Service sheet {sheet_id} not found.")
+            
+        patient = await Patient.get(sheet.patient_ref)
+        if not patient:
+            raise PatientNotFoundError("Associated patient record not found.")
+
+        return ServiceSheetDetail(
+            id=sheet.id,
+            patient=PatientCreate(**patient.model_dump()),
+            status=sheet.status,
+            nurse_ref=sheet.nurse_ref,
+            doctor_ref=sheet.doctor_ref,
+            created_at=sheet.created_at,
+            triage_data=sheet.triage_data,
+            doctor_data=sheet.doctor_data
         )
