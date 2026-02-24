@@ -11,11 +11,13 @@ import GetTriageSheet from './getTriageSheet';
 import FinishStepOne from './sheet_actions/FinishStepOne';
 import FinishStepTwo from './sheet_actions/FinishStepTwo';
 import FinishStepThree from './sheet_actions/FinishStepThree';
+import Finish from '../doctorpanel/finish';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,
     "current_step": status_nums,
-    "set_step": Function
+    "set_step": Function,
+    "user_role": "nurse"|"doctor"
 }
 
 export default function TriageSheet(params: triagesheetparams)
@@ -125,13 +127,29 @@ export default function TriageSheet(params: triagesheetparams)
             <Topic name="Final Observations">
                 <Field current_sheet_id={triageSheet.id} key_name='Final Nurse Observations' name='final_nurse_observations' value={triageSheet.triage_data?.final_nurse_notes} readonly={params.current_step != 3 ? [true, true] : [false, false]} textarea/>
             </Topic>
+
             <Topic name="Risk Evaluation">
                 <Field current_sheet_id={triageSheet.id} name='risk' key_name='Risk' value={triageSheet.patient.name} selector={["Azul", "Verde", "Amarelo", "Laranja", "Vermelho"]} readonly={params.current_step != 3 ? [true, true] : [false, false]}/>
             </Topic>
 
+
+            <Topic name="AI Pre-Consultation Summary">
+                {
+                    <Field current_sheet_id={triageSheet.id} key_name='ai_pre_consultation_summary' name='ai_pre_consultation_summary' value={triageSheet.doctor_data?.ai_pre_consultation_summary} readonly={[true, true]} textarea/>
+                }
+            </Topic>
+
+            <Topic name="Doctor Notes">
+                <Field current_sheet_id={triageSheet.id} key_name='Doctor Notes' name='doctor_notes' value={triageSheet.doctor_data?.doctor_notes} textarea/>
+            </Topic>
+
+            <Topic name="Prescription">
+                <Field current_sheet_id={triageSheet.id} key_name='prescription' name='prescription' value={triageSheet.doctor_data?.prescription} textarea/>
+            </Topic>
+
             <nav id="form-actions" className={[styles.actions, styles.form_actions].join(' ')}>
                 {
-                    params.current_step == 1 &&
+                    params.user_role == 'nurse' && params.current_step == 1 &&
                     <>
                         <SingleButton icon={<MessageCircleQuestionIcon/>} text="Generate Questions" alternativeStyle formAction={FinishStepOne} submit/>
                         <div className={styles.plus_button}>
@@ -142,17 +160,24 @@ export default function TriageSheet(params: triagesheetparams)
                     </>
                 }
                 {
-                    params.current_step == 2 &&
+                    params.user_role == 'nurse' && params.current_step == 2 &&
                     <>
                         <SingleButton icon={<Rocket/>} text="Generate Analysis"  alternativeStyle formAction={FinishStepTwo} submit/>
                     </>
                 }
                 {
-                    params.current_step == 3 &&
+                    params.user_role == 'nurse' && params.current_step == 3 &&
                     <>
                         <SingleButton icon={<Send/>} text="Send to Queue"  alternativeStyle formAction={FinishStepThree} submit/>
                     </>
                 }
+                {
+                    params.user_role == 'doctor' &&
+                    <>
+                        <SingleButton icon={<Send/>} text="Finish"  alternativeStyle formAction={Finish} submit/>
+                    </>
+                }
+
             </nav>
         </form>
 }

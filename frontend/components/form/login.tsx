@@ -57,6 +57,8 @@ export default async function Login(initialState: responseManagerResponse, param
             redirect('/patientregistry')
         else if(userInfo.role == 'nurse')
             redirect('/triagepanel')
+        else if(userInfo.role == 'doctor')
+            redirect('/doctorpanel')
         else
             redirect('/')
     }
