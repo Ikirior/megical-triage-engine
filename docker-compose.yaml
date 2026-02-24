@@ -16,6 +16,7 @@ services:
     networks:
       - db_net
       - server_net
+      - ollama_net
     volumes:
       - ./backend/:/src/
     ports:
@@ -36,10 +37,20 @@ services:
     env_file:
       - .env.db
 
+  ollama:
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    networks:
+      - ollama_net
+
+
 networks:
   db_net:
     driver: bridge
   server_net:
+    driver: bridge
+  ollama_net:
     driver: bridge
 
 volumes:
