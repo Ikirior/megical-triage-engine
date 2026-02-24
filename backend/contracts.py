@@ -100,7 +100,7 @@ class TriageDataPhaseTwo(BaseModel):
     investigation_qa: List[TriageInvestigationQA] = []
 
 class TriageDataPhaseThree(BaseModel):
-    ai_generated_sugestion: Optional[str] = None
+    ai_generated_suggestion: Optional[str] = None
     risk_classification: Optional[Literal["azul", "verde", "amarelo", "laranja", "vermelho"]] = None
     final_nurse_notes: Optional[str] = None
 
@@ -126,7 +126,7 @@ class TriageData(BaseModel):
     investigation_qa: List[TriageInvestigationQA] = []
     
     # Phase 3
-    ai_generated_sugestion: Optional[str] = None
+    ai_generated_suggestion: Optional[str] = None
     risk_classification: Optional[Literal["azul", "verde", "amarelo", "laranja", "vermelho"]] = None
     final_nurse_notes: Optional[str] = None
 
@@ -155,3 +155,19 @@ class ServiceSheetDetail(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class GeneratedQuestion(BaseModel):
+    question_text: str = Field(description="A clear question in Portuguese for the patient.")
+    historical_reference: Optional[str] = Field(description="Exact citation of the historical data (e.g., 'CID', 'Date', 'Pains', etc.) that prompted the question. Use 'N/A' if based only on current data.")
+    ai_reasoning: str = Field(description="Clinical rationale based on risks.")
+
+class InvestigationDecision(BaseModel):
+    needs_investigation: bool = Field(description="True if the case requires additional questions for screening.")
+    reasoning: str = Field(description="Technical analysis of the case comparing historical data with the current data entry.")
+    num_questions_decided: int = Field(description="The number of questions was decided based on their criticality and gaps in the historical record.")
+    questions: List[GeneratedQuestion] = Field(default_factory=list)
+
+class ClinicalSuggestion(BaseModel):
+    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(description="Risk classification according to the Manchester Protocol.")
+    technical_summary: str = Field(description="Clinical summary in bullet points for nursing.")
+    observation_points: List[str] = Field(description="Specific warning signs for the doctor.")
