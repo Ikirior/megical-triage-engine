@@ -157,6 +157,12 @@ async def execute_part_three(sheet_id: PydanticObjectId, input_data: TriageDataP
             status_code=HTTPStatus.BAD_REQUEST,
             detail=str(e)
         )
+    
+    except PatientNotFoundError as e:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=str(e)
+        )
 
 @router.get("/{sheet_id}/session", response_model=ServiceSheetDetail)
 async def get_triage_session(sheet_id: PydanticObjectId, current_nurse: User = Depends(get_current_nurse_user)):
