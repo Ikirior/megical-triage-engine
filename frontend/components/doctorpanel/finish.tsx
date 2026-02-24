@@ -2,6 +2,7 @@
 
 import getTokenHeaderValue from "@/utils/getTokenHeader";
 import ResponseManager, { responseManagerResponse } from "@/utils/responsemanager";
+import { redirect } from "next/navigation";
 
 export default async function Finish(initialState: responseManagerResponse, args: FormData) {
 
@@ -22,6 +23,9 @@ export default async function Finish(initialState: responseManagerResponse, args
             'Content-Type': 'application/json'
         }
     })
+
+    if(res.ok)
+        redirect('/doctorpanel');
 
     return ResponseManager(res)
 }

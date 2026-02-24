@@ -13,6 +13,7 @@ import FinishStepTwo from './sheet_actions/FinishStepTwo';
 import FinishStepThree from './sheet_actions/FinishStepThree';
 import Finish from '../doctorpanel/finish';
 import { responseManagerResponse } from '@/utils/responsemanager';
+import StartDoctorSheet from '../doctorpanel/startDoctorSheet';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,
@@ -38,7 +39,8 @@ export default function TriageSheet(params: triagesheetparams)
                     // If it's a new patient, start the triage
                     if(params.current_step == 0)
                     {
-                        updated_sheet = (await StartTriageSheet(params.current_sheet_id)).content;
+                        updated_sheet = params.user_role == 'nurse' ? (await StartTriageSheet(params.current_sheet_id)).content : (await StartDoctorSheet(params.current_sheet_id)).content;
+
                     }
 
                     // Otherwise, update it to reflect what was last done. If the received value is undefined, try loading it from its ID.
