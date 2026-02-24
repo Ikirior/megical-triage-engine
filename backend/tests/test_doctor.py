@@ -91,3 +91,38 @@ async def test_get_doctor_queue_unauthenticated(guest_client):
     """
     response = await guest_client.get("/doctors/queue")
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+@pytest.mark.asyncio
+async def test_doctor_can_get_own_session(doctor_client, seed_ready_service_sheet):
+    """
+    Verifies that a doctor can recover their active consultation session.
+    """
+    sheet_id = str(seed_ready_service_sheet.id)
+
+    start_response = await doctor_client.post(f"/doctors/{sheet_id}/start")
+    assert start_response.status_code == HTTPStatus.OK
+    
+    response = await doctor_client.get(f"/doctors/{sheet_id}/session")
+
+    if response.status_code == HTTPStatus.UNAUTHORIZED:
+        print(f"Debug Detail: {response.json()}")
+
+    assert response.status_code == HTTPStatus.OK
+    data = response.json()
+    assert data["id"] == sheet_id
+    assert data["doctor_ref"] is not None
+
+@pytest.mark.asyncio
+async def test_doctor_cannot_get_other_doctor_session(doctor_client, admin_client, seed_ready_service_sheet):
+    """
+    Ensures a doctor cannot read the session of a patient assigned to another doctor.
+    We use admin_client here to simulate a different authenticated user binding the sheet.
+    """
+    sheet_id = str(seed_ready_service_sheet.id)
+    
+    await admin_client.post(f"/doctors/{sheet_id}/start")
+    
+    response = await doctor_client.get(f"/doctors/{sheet_id}/session")
+    
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert "does not have access" in response.json()["detail"].lower()
