@@ -258,7 +258,7 @@ class TriageService:
         
         ai_observation = await MedGemmaProvider.generate_medical_suggestion(triage_data=triage_data, patient_history=patient_history, unity_history=unity_history)
         
-        triage_data.ai_generated_sugestion = ai_observation
+        triage_data.ai_generated_suggestion = ai_observation
         
         await sheet.update(Set({ServiceSheet.triage_data: triage_data,
                                 ServiceSheet.status: TriageStatus.em_triagem_fase_3}))
