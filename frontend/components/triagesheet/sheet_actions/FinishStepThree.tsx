@@ -8,7 +8,7 @@ export default async function FinishStepThree(initialState: responseManagerRespo
     const sheet_id= args.get('sheet_id'); 
     
     const format = {
-        "ai_generated_sugestion": args.get('ai_generated_suggestions.VALUE'),
+        "ai_generated_suggestion": args.get('ai_generated_suggestions.VALUE'),
         "risk_classification": args.get('risk.VALUE'),
         "final_nurse_notes": args.get('final_nurse_observations.VALUE')
     }
