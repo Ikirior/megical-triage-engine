@@ -118,7 +118,7 @@ async def doctor_client(seed_doctor):
         yield client
 
 @pytest_asyncio.fixture(scope="function")
-async def seed_ready_service_sheet(seed_patient, seed_receptionist):
+async def seed_ready_service_sheet(seed_patient, seed_receptionist, seed_nurse):
     """
     Utility to create a service sheet that has already cleared triage.
     Status is set to 'aguardando_medico' to test the doctor's flow.
@@ -126,6 +126,7 @@ async def seed_ready_service_sheet(seed_patient, seed_receptionist):
     sheet = ServiceSheet(
         patient_ref=seed_patient.id,
         receptionist_ref=seed_receptionist.id,
+        nurse_ref=seed_nurse.id,
         status=TriageStatus.aguardando_medico,
         triage_data={
             "vitals": {
