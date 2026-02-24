@@ -112,9 +112,11 @@ class TriageQueueItem(BaseModel):
     status: TriageStatus
 
 class DoctorQueueItem(BaseModel):
-    id: PydanticObjectId
+    sheet_id: PydanticObjectId
+    patient_id: PydanticObjectId
     patient_name: str
     risk_classification: Literal["azul", "verde", "amarelo", "laranja", "vermelho"]
+    status: TriageStatus
     waiting_since: datetime
 
 class TriageData(BaseModel):
@@ -147,6 +149,7 @@ class ServiceSheetDetail(BaseModel):
     id: PydanticObjectId
     patient: PatientCreate
     nurse_ref: PydanticObjectId
+    doctor_ref: Optional[PydanticObjectId] = None
     status: TriageStatus
     created_at: datetime
     triage_data: Optional[TriageData] = None
@@ -168,6 +171,6 @@ class InvestigationDecision(BaseModel):
     questions: List[GeneratedQuestion] = Field(default_factory=list)
 
 class ClinicalSuggestion(BaseModel):
-    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(description="Risk classification according to the Manchester Protocol.")
+    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(description="Risk classification according to the standard 5-level clinical severity guidelines")
     technical_summary: str = Field(description="Clinical summary in bullet points for nursing.")
     observation_points: List[str] = Field(description="Specific warning signs for the doctor.")
