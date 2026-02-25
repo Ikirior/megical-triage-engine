@@ -29,9 +29,10 @@ class MedGemmaProvider:
     """
     
     _ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    _ollama_model = os.getenv("OLLAMA_MODEL")
     
     llm = OllamaLLM(
-        model="hf.co/unsloth/medgemma-27b-it-GGUF:Q6_K",
+        model=_ollama_model,
         base_url=_ollama_base_url,
         temperature=0.1
     )
