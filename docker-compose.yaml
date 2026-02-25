@@ -3,8 +3,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    volumes:
-      - ./frontend/:/src/
     networks:
       - server_net
     ports:
@@ -30,19 +28,28 @@ services:
     restart: always
     networks:
       - db_net
-    volumes:
-      - db_megical:/src/
     ports:
       - "127.0.0.1:27017:27017"
     env_file:
       - .env.db
 
   ollama:
-    build:
-      context: ./ollama
-      dockerfile: Dockerfile
+    image: ollama/ollama
     networks:
       - ollama_net
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 
 networks:
@@ -55,3 +62,4 @@ networks:
 
 volumes:
   db_megical:
+  ollama_data:
