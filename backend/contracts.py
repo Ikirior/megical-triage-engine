@@ -166,9 +166,15 @@ class InvestigationDecision(BaseModel):
     questions: List[GeneratedQuestion] = Field(default_factory=list)
 
 class ClinicalSuggestion(BaseModel):
-    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(description="Risk classification according to the standard 5-level clinical severity guidelines")
-    technical_summary: str = Field(description="Clinical summary in bullet points for nursing.")
-    observation_points: List[str] = Field(description="Specific warning signs for the doctor.")
+    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(
+        description="Risk classification according to the standard 5-level clinical severity guidelines"
+    )
+    technical_summary: List[str] = Field(
+        description="Clinical summary in bullet points for nursing."
+    )
+    observation_points: List[str] = Field(
+        description="Specific warning signs for the doctor."
+    )
 
 class PatientHistoryItem(BaseModel):
     patient_id: PydanticObjectId

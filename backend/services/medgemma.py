@@ -275,7 +275,11 @@ Final Constraint: Output ONLY the raw JSON object. Do not include any conversati
                 "answers_phase_one": respostas
             })
             markdown_output = f"### Risk Suggestion: {result.risk_color.upper()}\n\n"
-            markdown_output += f"**Technical Summary:**\n{result.technical_summary}\n\n"
+            markdown_output += "**Technical Summary:**\n"
+            for summary_item in result.technical_summary:
+                markdown_output += f"- {summary_item}\n"
+            markdown_output += "\n"
+
             markdown_output += "**Observation Points for the Nurse:**\n"
             for point in result.observation_points:
                 markdown_output += f"- {point}\n"
