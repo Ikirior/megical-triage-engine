@@ -6,7 +6,7 @@ services:
     networks:
       - server_net
     ports:
-      - "3000:3000"
+      - "80:3000"
   backend_server:
     build:
       context: ./backend
