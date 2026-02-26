@@ -30,6 +30,8 @@ services:
       - "127.0.0.1:27017:27017"
     env_file:
       - .env.db
+    volumes:
+      - db_megical:/data/db
 
   ollama:
     image: ollama/ollama
