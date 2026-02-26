@@ -114,22 +114,26 @@ class DoctorService:
         if not doctor:
             raise DoctorNotFoundError(f"Doctor {doctor_id} not found in the system.")
         
-        if sheet.status != TriageStatus.aguardando_medico:
+        is_already_doctor = sheet.status == TriageStatus.em_atendimento and sheet.doctor_ref == doctor_id
+        
+        if sheet.status != TriageStatus.aguardando_medico and not is_already_doctor:
             raise InvalidConsultationStateError("Patient is not available for consultation or already taken.")
         
         patient = await Patient.get(sheet.patient_ref)
         if not patient:
             raise PatientNotFoundError("Patient record not found.")
         
-        await sheet.update(Set({
-            ServiceSheet.status: TriageStatus.em_atendimento,
-            ServiceSheet.doctor_ref: doctor_id,
-        }))
+        if not is_already_doctor:
+            await sheet.update(Set({
+                ServiceSheet.status: TriageStatus.em_atendimento,
+                ServiceSheet.doctor_ref: doctor_id,
+            }))
         
         return ServiceSheetDetail(
             id=sheet.id,
             patient=PatientCreate(**patient.model_dump()),
             nurse_ref=sheet.nurse_ref,
+            doctor_ref=doctor_id,
             status=TriageStatus.em_atendimento,
             created_at=sheet.created_at,
             triage_data=sheet.triage_data,

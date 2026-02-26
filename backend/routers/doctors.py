@@ -3,7 +3,7 @@ from http import HTTPStatus
 from typing import List
 from beanie import PydanticObjectId
 
-from contracts import DoctorQueueItem, ServiceSheetDetail, DoctorData
+from contracts import DoctorQueueItem, ServiceSheetDetail, DoctorData, TriageStatus
 from models import User
 from dependencies import get_current_doctor_user
 from services.doctor import DoctorService
@@ -118,21 +118,20 @@ async def get_triage_session(sheet_id: PydanticObjectId, current_doctor: User = 
     try:
         session_data = await DoctorService.get_triage_session(sheet_id=sheet_id)
         
-        if session_data.doctor_ref != current_doctor.id:
+        can_access = (
+            session_data.doctor_ref == current_doctor.id or 
+            session_data.status == TriageStatus.aguardando_medico
+        )
+
+        if not can_access:
             raise HTTPException(
-                status_code=HTTPStatus.UNAUTHORIZED,
-                detail="Doctor trying to access data that he does not have access to."
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Este paciente está em atendimento por outro médico."
             )
         
         return session_data
     
     except ServiceSheetNotFoundError as e:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
     except PatientNotFoundError as e:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(e))
