@@ -15,8 +15,6 @@ services:
       - db_net
       - server_net
       - ollama_net
-    volumes:
-      - ./backend/:/src/
     ports:
       - "3001:3001"
     environment:
