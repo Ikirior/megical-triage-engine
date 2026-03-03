@@ -10,6 +10,9 @@ from langchain_core.prompts import PromptTemplate
 from contracts import (GeneratedQuestion, InvestigationDecision, ClinicalSuggestion,
                        PatientHistoryItem, TriageData, UnityContextSnapshot,
                        ServiceSheetDetail, TriageInvestigationQA)
+import logging
+
+logger = logging.Logger('MEDGEMMA_SERVICE')
 
 class MedGemmaProvider:
     """
@@ -368,3 +371,77 @@ RULES:
             return summary.strip()
         except Exception as e:
             return f"Erro ao gerar resumo médico: {str(e)}"
+
+# MOCK -----------------------------------------------------------------------------------------------
+
+class MedGemmaProviderMock(MedGemmaProvider):
+
+    # ClinicalSuggestion
+    @classmethod
+    async def generate_clinical_suggestion(cls, triage_data: TriageData, patient_history: List[PatientHistoryItem], unity_history: UnityContextSnapshot) -> str:
+        """
+        PHASE 2: Consumes the Phase 1 answers and generates the final triage risk suggestion.
+
+        Args:
+            triage_data (TriageData): Current triage data including investigation QA.
+            patient_history (List[PatientHistoryItem]): Patient's clinical history.
+            unity_history (UnityContextSnapshot): Unit context data.
+
+        Returns:
+            str: Markdown formatted string containing the risk color and clinical summary.
+        """
+        markdown_output = f"### Risk Suggestion: *simulation content*\n\n"
+        markdown_output += "**Technical Summary:** *simulation content*\n"
+        markdown_output += "**Observation Points for the Nurse:** *simulation content*\n"
+
+        return markdown_output
+
+    @classmethod
+    async def orchestrate_investigation(cls, triage_data: TriageData, patient_history: List[PatientHistoryItem], unity_history: UnityContextSnapshot) -> List[TriageInvestigationQA]:
+        final_qa_list = []
+    
+        for i in range(2):
+            final_qa_list.append(
+                TriageInvestigationQA(
+                    question_id=PydanticObjectId(),
+                    question_text=f"Pergunta simulada {i+1} pela IA. O paciente sente dor?",
+                    ai_reasoning=f"Raciocínio simulado {i+1}: Investigar possível quadro agudo.",
+                    patient_answer=None
+                )
+            )
+        return final_qa_list
+    
+    @staticmethod
+    async def generate_medical_suggestion(triage_data: TriageData, patient_history: List[PatientHistoryItem], unity_history: UnityContextSnapshot) -> str:
+        return (
+            "**Sugestão Diagnóstica (Mock IA):**\n"
+            "- Possível infecção viral respiratória baseada na temperatura (febre) e saturação.\n"
+            "- Observar frequência cardíaca elevada.\n"
+            "\n*Nota: Esta é uma simulação gerada para testes de interface.*"
+        )
+    
+    @classmethod
+    async def generate_doctor_summary(cls, sheet_details: ServiceSheetDetail) -> str:
+        """
+        PHASE 3: Generates a concise handover summary for the attending doctor.
+        Designed to be run asynchronously via a background task queue.
+
+        Args:
+            sheet (ServiceSheet): The finalized service sheet containing triage data.
+
+        Returns:
+            str: A short, 3-sentence plain text clinical summary.
+        """
+        triage_data = sheet_details.triage_data
+
+        if not triage_data:
+            return "Insufficient triage data for summary."
+
+        return "**Simulated Summary**"
+
+        
+    
+# CLOUD ----------------------------------------------------------------------------------------------
+
+class MedGemmaProviderCloud(MedGemmaProvider):
+    pass

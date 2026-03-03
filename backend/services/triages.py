@@ -15,6 +15,12 @@ from exceptions import (
     ServiceSheetNotFoundError, NurseNotFoundError, 
     InvalidTriageStateError, IncompleteTriageDataError, PatientNotFoundError
 )
+from factories.create_medgemma import create_medgemma
+import logging
+
+medgemma_provider = create_medgemma()
+
+logging.warning(f'Medgemma provider: ', medgemma_provider)
 
 class TriageService:
     """
@@ -208,7 +214,7 @@ class TriageService:
         
         unity_history = await TriageService._calculate_unit_context()
         
-        triage_questions = await MedGemmaProvider.orchestrate_investigation(triage_data=triage_data,
+        triage_questions = await medgemma_provider.orchestrate_investigation(triage_data=triage_data,
                                                                             patient_history=patient_history,
                                                                             unity_history=unity_history)
         
@@ -256,7 +262,7 @@ class TriageService:
         
         unity_history = await TriageService._calculate_unit_context()
         
-        ai_observation = await MedGemmaProvider.generate_clinical_suggestion(triage_data=triage_data, patient_history=patient_history, unity_history=unity_history)
+        ai_observation = await medgemma_provider.generate_clinical_suggestion(triage_data=triage_data, patient_history=patient_history, unity_history=unity_history)
         
         triage_data.ai_generated_suggestion = ai_observation
         
@@ -272,7 +278,7 @@ class TriageService:
         and persists the generated string into the database.
         """
         try:
-            summary = await MedGemmaProvider.generate_doctor_summary(sheet_details)
+            summary = await medgemma_provider.generate_doctor_summary(sheet_details)
             
             sheet = await ServiceSheet.get(sheet_id)
             if sheet:
