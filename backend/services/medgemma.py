@@ -11,6 +11,7 @@ from contracts import (GeneratedQuestion, InvestigationDecision, ClinicalSuggest
                        PatientHistoryItem, TriageData, UnityContextSnapshot,
                        ServiceSheetDetail, TriageInvestigationQA)
 import logging
+from services.cloud_llm import CloudLLM
 
 logger = logging.Logger('MEDGEMMA_SERVICE')
 
@@ -33,12 +34,17 @@ class MedGemmaProvider:
     
     _ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     _ollama_model = os.getenv("OLLAMA_MODEL")
+    _use_model = os.getenv("USE_MODEL", "local")
     
-    llm = OllamaLLM(
-        model=_ollama_model,
-        base_url=_ollama_base_url,
-        temperature=0.1
-    )
+    llm = None
+    if _use_model == 'local':
+        llm = OllamaLLM(
+            model=_ollama_model,
+            base_url=_ollama_base_url,
+            temperature=0.1
+        )
+    else:
+        llm = CloudLLM()
 
     parser_phase_one = PydanticOutputParser(pydantic_object=InvestigationDecision)
     parser_phase_two = PydanticOutputParser(pydantic_object=ClinicalSuggestion)
@@ -438,10 +444,3 @@ class MedGemmaProviderMock(MedGemmaProvider):
             return "Insufficient triage data for summary."
 
         return "**Simulated Summary**"
-
-        
-    
-# CLOUD ----------------------------------------------------------------------------------------------
-
-class MedGemmaProviderCloud(MedGemmaProvider):
-    pass

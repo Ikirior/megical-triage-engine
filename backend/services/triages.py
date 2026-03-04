@@ -20,8 +20,6 @@ import logging
 
 medgemma_provider = create_medgemma()
 
-logging.warning(f'Medgemma provider: ', medgemma_provider)
-
 class TriageService:
     """
     Orchestrates the triage workflow, managing data persistence and AI integration.

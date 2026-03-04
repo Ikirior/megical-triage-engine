@@ -181,3 +181,6 @@ class PatientHistoryItem(BaseModel):
     created_at: datetime
     triage_data: Optional[TriageData] = None
     doctor_data: Optional[DoctorData] = None
+
+class CloudLLMResponse(BaseModel):
+    response: str = None
