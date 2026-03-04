@@ -7,6 +7,10 @@ services:
       - server_net
     ports:
       - "80:3000"
+    volumes:
+      - ./frontend/:/src/
+    env_file:
+      - .env.front
   backend_server:
     build:
       context: ./backend
