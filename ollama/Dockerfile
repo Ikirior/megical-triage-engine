@@ -1,9 +1,6 @@
-FROM ubuntu
+FROM ollama/ollama
 
-RUN apt-get update -y
-RUN apt-get upgrade -y
-RUN apt-get install -y pciutils lshw
-RUN apt-get install -y zstd
-RUN apt-get install -y curl
-RUN curl -fsSL https://ollama.com/install.sh | sh
-CMD ["ollama","serve"]
+COPY entrypoint.sh .
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]

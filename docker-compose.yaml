@@ -38,7 +38,9 @@ services:
       - db_megical:/data/db
 
   ollama:
-    image: ollama/ollama
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
     networks:
       - ollama_net
     environment:
@@ -54,6 +56,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    profiles:
+      - local
 
 
 networks:
