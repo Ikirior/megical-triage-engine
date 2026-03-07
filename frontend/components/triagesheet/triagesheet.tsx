@@ -172,19 +172,19 @@ export default function TriageSheet(params: triagesheetparams)
                 {
                     params.user_role == 'nurse' && params.current_step == 2 &&
                     <>
-                        <SingleButton icon={<Rocket/>} text="Generate Analysis"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepTwo)} submit/>
+                        <SingleButton icon={<Rocket/>} text="Generate Analysis"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepTwo)} submit criticalOverlay/>
                     </>
                 }
                 {
                     params.user_role == 'nurse' && params.current_step == 3 &&
                     <>
-                        <SingleButton icon={<Send/>} text="Send to Queue"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepThree)} submit/>
+                        <SingleButton icon={<Send/>} text="Send to Queue"  alternativeStyle clientFormFunction={ReloadWrapper(FinishStepThree)} submit criticalOverlay/>
                     </>
                 }
                 {
                     params.user_role == 'doctor' &&
                     <>
-                        <SingleButton icon={<Send/>} text="Finish"  alternativeStyle clientFormFunction={ReloadWrapper(Finish)} submit/>
+                        <SingleButton icon={<Send/>} text="Finish"  alternativeStyle clientFormFunction={ReloadWrapper(Finish)} submit criticalOverlay/>
                     </>
                 }
 

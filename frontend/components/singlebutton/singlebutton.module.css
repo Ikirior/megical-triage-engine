@@ -90,3 +90,28 @@
     align-content: center;
     justify-items: center;
 }
+
+/* Loading --------------------------------------------------*/
+
+.loading
+{
+    display: flex;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: center;
+    z-index: 5 !important;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.loading > *, .load_anim
+{
+    animation: loadingAnim 500ms forwards infinite;
+}
+
+@keyframes loadingAnim {
+    from {transform: rotate(0deg);} to {transform: rotate(360deg);}
+}

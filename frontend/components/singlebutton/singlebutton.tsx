@@ -4,6 +4,8 @@ import styles from "@/components/singlebutton/singlebutton.module.css"
 import { responseManagerResponse } from "@/utils/responsemanager";
 import { JSX, MouseEventHandler, useActionState } from "react"
 import Message from "../messages/msg";
+import LoadingOverlay from "./loading";
+import { Loader2Icon } from "lucide-react";
 
 type singlebutton_params = {
     icon: any,
@@ -14,17 +16,27 @@ type singlebutton_params = {
     formAction?: (initialState:responseManagerResponse, args:FormData) => Promise<responseManagerResponse>,
     title?: string,
     clientFormFunction?: (args: FormData) => void,
-    alternativeStyle?: boolean
+    alternativeStyle?: boolean,
+    criticalOverlay?: boolean 
 }
 
 export default function SingleButton(params: singlebutton_params)
 {
     const error_msg:JSX.Element[] = [];
     let action_func = undefined
+    let loading = false;
+    let icon:JSX.Element = params.icon
     if(params?.formAction)
         {
             const [state, action, isPending] = useActionState(params.formAction, {"msg": null, "success": false})
             action_func = action;
+            loading = isPending;
+
+            if(loading && !params.criticalOverlay)
+            {
+                icon = <Loader2Icon color={icon.props.color ?? 'black'} className={styles.load_anim}/>
+            }
+
             if(!state.success && state.msg)
                 error_msg.push(state.msg)
         }
@@ -40,17 +52,21 @@ export default function SingleButton(params: singlebutton_params)
     return (
         <>
             {...error_msg}
-            <button className={params.alternativeStyle ? styles.alt_button : styles.button} style={styles_obj} title={params?.title} formAction={action_func ?? params.clientFormFunction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
+            {
+                (loading && params.criticalOverlay) &&
+                <LoadingOverlay/>
+            }
+            <button aria-busy={loading} disabled={loading} className={params.alternativeStyle ? styles.alt_button : styles.button} style={styles_obj} title={params?.title} formAction={action_func ?? params.clientFormFunction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
                 
                 {
                     !params.alternativeStyle ?
                     <>
-                        {params.icon}
+                        {icon}
                         {params.text}
                     </> :
                     <>
                         <div className={styles.alt_figure}>
-                            {params.icon}
+                            {icon}
                         </div>
                         <div className={styles.alt_text}>{params.text}</div>
                     </>
