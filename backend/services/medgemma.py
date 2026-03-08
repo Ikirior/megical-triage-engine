@@ -397,8 +397,8 @@ class MedGemmaProviderMock(MedGemmaProvider):
             str: Markdown formatted string containing the risk color and clinical summary.
         """
         markdown_output = f"### Risk Suggestion: *simulation content*\n\n"
-        markdown_output += "**Technical Summary:** *simulation content*\n"
-        markdown_output += "**Observation Points for the Nurse:** *simulation content*\n"
+        markdown_output += "**Technical Summary:** *simulation content*\n  "
+        markdown_output += "**Observation Points for the Nurse:** *simulation content*\n  "
 
         return markdown_output
 

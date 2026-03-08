@@ -4,6 +4,7 @@ import styles from '@/components/triagesheet/triagesheet.module.css'
 import { ArrowDown, ArrowDownIcon, BrainCircuitIcon } from 'lucide-react';
 import { useState } from 'react';
 import { investigation_qa_obj } from './types';
+import Markdown from 'react-markdown';
 
 type field_params = {
     name: string,
@@ -20,15 +21,23 @@ type field_params = {
 
 export default function Field(params: field_params)
 {
+    // Showing the reasoning popup
     const [showReasoning, setShowReasoning] = useState(false);
+
+    // State used to allow for markdown editing
+    const [markdownProp, setMarkdownProp] = useState({
+        'content': params.value?.toString() ?? '',
+        'editingActive': false
+    });
 
     // params.name is an identifier for the form submission
 
     let new_key_name = params.name + '.KEY';
     let new_value_name = params.name + '.VALUE';
 
-    // Elements ------------------
+    // Elements _______________________________________________________
 
+    // Selector ------------------
     if(params.selector)
         return <div className={styles.field} style={{width: "100%"}}>
             <div>{params.key_name}</div>
@@ -37,9 +46,44 @@ export default function Field(params: field_params)
             </select>
         </div>
 
+    // Textarea ------------------
     if(params.textarea)
-        return <textarea name={new_value_name} className={styles.textarea} id="" readOnly={params.readonly?.at(0) || params.readonly?.at(1)} defaultValue={params.value ?? ''}></textarea>
+    {
+        const readOnly = params.readonly?.at(0) || params.readonly?.at(1)
+        const displayEditingView = !markdownProp.editingActive || readOnly
+        let custom_styles = {}
+    
+        if(displayEditingView) custom_styles = {visibility: 'hidden', position: 'fixed'}
+        
+        const textAreaElement = 
+        <textarea 
+            name={new_value_name} 
+            className={styles.textarea} 
+            id="" 
+            readOnly={readOnly} 
+            defaultValue={markdownProp.content} 
+            style={custom_styles}   
+            onChange={(e)=>{setMarkdownProp({...markdownProp, content: e.target.value})}}
+            onBlur={(e)=>{setMarkdownProp({...markdownProp, editingActive: false})}}
+            ></textarea>
+        
+        // If the field is read-only or editingActive is true, render it as markdown.
+        if(displayEditingView)
+        {
+            return <>
+                {textAreaElement}
+                <div className={styles.textarea} onClick={() => {setMarkdownProp({...markdownProp, editingActive: true})}}>
+                    <Markdown>
+                        {`${markdownProp.content}`}
+                    </Markdown>
+                </div>
+                
+            </>
+        }
+        else return textAreaElement
+    }
 
+    // Standard Field ------------
     return (
         <div className={params.ai_info ? styles.ai_question : styles.field} key={new_key_name + params.current_sheet_id}>
             

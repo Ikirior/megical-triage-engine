@@ -14,6 +14,7 @@ import FinishStepThree from './sheet_actions/FinishStepThree';
 import Finish from '../doctorpanel/finish';
 import { responseManagerResponse } from '@/utils/responsemanager';
 import StartDoctorSheet from '../doctorpanel/startDoctorSheet';
+import Markdown from 'react-markdown';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,
@@ -129,9 +130,7 @@ export default function TriageSheet(params: triagesheetparams)
             </Topic>
 
             <Topic name="AI Suggestions">
-                {
-                    <Field current_sheet_id={triageSheet.id} key_name='ai_generated_suggestions' name='ai_generated_suggestions' value={triageSheet.triage_data?.ai_generated_suggestion} readonly={params.current_step != 3 ? [true, true] : [false, false]} textarea/>
-                }
+                <Field current_sheet_id={triageSheet.id} key_name='ai_generated_suggestions' name='ai_generated_suggestions' value={triageSheet.triage_data?.ai_generated_suggestion} readonly={params.current_step != 3 ? [true, true] : [false, false]} textarea/>
             </Topic>
 
             <Topic name="Final Observations">
@@ -144,9 +143,7 @@ export default function TriageSheet(params: triagesheetparams)
 
 
             <Topic name="AI Pre-Consultation Summary">
-                {
-                    <Field current_sheet_id={triageSheet.id} key_name='ai_pre_consultation_summary' name='ai_pre_consultation_summary' value={triageSheet.doctor_data?.ai_pre_consultation_summary} readonly={[true, true]} textarea/>
-                }
+                <Field current_sheet_id={triageSheet.id} key_name='ai_pre_consultation_summary' name='ai_pre_consultation_summary' value={triageSheet.doctor_data?.ai_pre_consultation_summary} readonly={[true, true]} textarea/>
             </Topic>
 
             <Topic name="Doctor Notes">
