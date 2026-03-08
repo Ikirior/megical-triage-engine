@@ -123,8 +123,8 @@ export default function TriageSheet(params: triagesheetparams)
                 {...extraVitalFields}
             </Topic>
 
-            <Topic name="Observations" disabled={params.user_role != 'nurse'}>
-                <Field current_sheet_id={triageSheet.id} key_name='Nurse Observations' name='nurse_observations' value={triageSheet.triage_data?.nurse_initial_observations} textarea/>
+            <Topic name="Observations">
+                <Field current_sheet_id={triageSheet.id} key_name='Nurse Observations' name='nurse_observations' value={triageSheet.triage_data?.nurse_initial_observations} textarea readonly={params.user_role != 'nurse' ? [true, false] : [true, true]}/>
             </Topic>
             
             <Topic name="Complementary Analysis with AI">

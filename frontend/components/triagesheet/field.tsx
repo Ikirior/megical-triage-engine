@@ -52,7 +52,7 @@ export default function Field(params: field_params)
     if(params.textarea)
     {
         const readOnly = params.readonly?.at(0) || params.readonly?.at(1)
-        const displayMarkdownView = !markdownProp.editingActive || readOnly
+        const displayMarkdownView = !markdownProp.editingActive || (readOnly ?? false)
         let custom_styles = {}
     
         if(displayMarkdownView) custom_styles = {visibility: 'hidden', position: 'fixed'}
@@ -63,8 +63,8 @@ export default function Field(params: field_params)
             className={styles.textarea} 
             id="" 
             readOnly={readOnly}
-            defaultValue={markdownProp.content} 
-            style={custom_styles}   
+            value={markdownProp.content} 
+            style={custom_styles}
             onChange={(e)=>{setMarkdownProp({...markdownProp, content: e.target.value})}}
             onBlur={(e)=>{setMarkdownProp({...markdownProp, editingActive: false})}}
             ></textarea>
