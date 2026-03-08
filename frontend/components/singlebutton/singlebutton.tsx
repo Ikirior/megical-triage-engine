@@ -17,7 +17,8 @@ type singlebutton_params = {
     title?: string,
     clientFormFunction?: (args: FormData) => void,
     alternativeStyle?: boolean,
-    criticalOverlay?: boolean 
+    criticalOverlay?: boolean,
+    successMessage?: string
 }
 
 export default function SingleButton(params: singlebutton_params)
@@ -25,7 +26,8 @@ export default function SingleButton(params: singlebutton_params)
     const error_msg:JSX.Element[] = [];
     let action_func = undefined
     let loading = false;
-    let icon:JSX.Element = params.icon
+    let icon:JSX.Element = params.icon;
+    let showSuccessMessage = false;
     if(params?.formAction)
         {
             const [state, action, isPending] = useActionState(params.formAction, {"msg": null, "success": false})
@@ -39,6 +41,9 @@ export default function SingleButton(params: singlebutton_params)
 
             if(!state.success && state.msg)
                 error_msg.push(state.msg)
+            else if(state.success && params.successMessage)
+                showSuccessMessage = true;
+        
         }
     
     let styles_obj = {}
@@ -52,12 +57,19 @@ export default function SingleButton(params: singlebutton_params)
     return (
         <>
             {...error_msg}
+            {showSuccessMessage && params.successMessage && !loading && <Message backgroundColor="rgb(146, 255, 179)" text={params.successMessage}/>}
             {
                 (loading && params.criticalOverlay) &&
                 <LoadingOverlay/>
             }
-            <button aria-busy={loading} disabled={loading} className={params.alternativeStyle ? styles.alt_button : styles.button} style={styles_obj} title={params?.title} formAction={action_func ?? params.clientFormFunction} onClick={params?.action as MouseEventHandler<HTMLButtonElement>} type={params.submit ? 'submit' : 'button'} value='button'>
-                
+            <button aria-busy={loading} 
+                    disabled={loading} 
+                    className={params.alternativeStyle ? styles.alt_button : styles.button} 
+                    style={styles_obj} title={params?.title} 
+                    formAction={action_func ?? params.clientFormFunction} 
+                    onClick={params?.action as MouseEventHandler<HTMLButtonElement>} 
+                    type={params.submit ? 'submit' : 'button'} 
+                    value='button'>
                 {
                     !params.alternativeStyle ?
                     <>

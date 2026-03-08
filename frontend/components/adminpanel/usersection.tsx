@@ -50,7 +50,7 @@ export default function UserSection(params: usersection_params)
                             return resMan;
                             
                             }} title="delete user"/>
-                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
+                        <SingleButton icon={<SaveIcon/>} successMessage={`User updated successfully.`} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
                             
                             const resMan = await UpdateUser(initialState, args);
                             if(resMan.success && params.setUsers && params.usersState)

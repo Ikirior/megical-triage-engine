@@ -54,13 +54,9 @@ export default function PatientSection(params: usersection_params)
                         <SingleButton icon={<ListPlusIcon/>} backgroudColor="#5ebfff" submit={true} formAction={async (initialState, args) => {
                                 
                                 const resMan = await SendToQueue(initialState, args);
-                                if(resMan.success)
-                                {
-                                    alert(params.cell?.name + ' was sent to the queue.');
-                                }
                                 return resMan;
                                 
-                                }} title="send user to queue"/>
+                                }} title="send patient to queue" successMessage="Patient sent to queue."/>
                         <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
                             
                             const resMan = await UpdatePatient(initialState, args);
@@ -73,7 +69,7 @@ export default function PatientSection(params: usersection_params)
                             }
                             return resMan;
                             
-                            }} title="update user"/>
+                            }} title="update patient" successMessage="Patient updated successfully."/>
                     </>
                 }
                 {
