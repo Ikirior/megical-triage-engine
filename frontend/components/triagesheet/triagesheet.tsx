@@ -30,7 +30,7 @@ export default function TriageSheet(params: triagesheetparams)
     const [extraVitalFields, setExtraVitalFields] = useState([] as JSX.Element[]);
 
     const loadTriageSheet = () => {
-        console.log('Updating Service Sheet for ', params.current_sheet_id);
+        //console.log('Updating Service Sheet for ', params.current_sheet_id);
         
             const loadTriageSheet = async () =>
             {
@@ -67,7 +67,7 @@ export default function TriageSheet(params: triagesheetparams)
                         }
                         else setExtraVitalFields([]);
 
-                        console.log(updated_sheet)
+                        //console.log(updated_sheet)
                         setTriageSheet({...updated_sheet});
                         params.set_step(STEP_MAPPING[updated_sheet.status as status])
                     }
