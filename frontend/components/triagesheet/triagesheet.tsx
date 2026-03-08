@@ -15,6 +15,7 @@ import Finish from '../doctorpanel/finish';
 import { responseManagerResponse } from '@/utils/responsemanager';
 import StartDoctorSheet from '../doctorpanel/startDoctorSheet';
 import Markdown from 'react-markdown';
+import GetDoctorSheet from '../doctorpanel/getDoctorSheet';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,
@@ -47,7 +48,10 @@ export default function TriageSheet(params: triagesheetparams)
                     // Otherwise, update it to reflect what was last done. If the received value is undefined, try loading it from its ID.
                     if(updated_sheet == undefined)
                     {
-                        updated_sheet = (await GetTriageSheet(params.current_sheet_id)).content;
+                        if(params.user_role == 'nurse')
+                            updated_sheet = (await GetTriageSheet(params.current_sheet_id)).content;
+                        else if(params.user_role == 'doctor')
+                            updated_sheet = (await GetDoctorSheet(params.current_sheet_id)).content
                     }
 
                     // Set Sheet
