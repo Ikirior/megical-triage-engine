@@ -2,7 +2,7 @@
 
 import styles from '@/components/triagesheet/triagesheet.module.css'
 import { ArrowDown, ArrowDownIcon, BrainCircuitIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { investigation_qa_obj } from './types';
 import Markdown from 'react-markdown';
 
@@ -30,6 +30,8 @@ export default function Field(params: field_params)
         'editingActive': false
     });
 
+    useEffect(()=>{setMarkdownProp({...markdownProp, content: params.value?.toString() ?? ''})}, [params.value])
+
     // params.name is an identifier for the form submission
 
     let new_key_name = params.name + '.KEY';
@@ -39,7 +41,7 @@ export default function Field(params: field_params)
 
     // Selector ------------------
     if(params.selector)
-        return <div className={styles.field} style={{width: "100%"}}>
+        return <div className={styles.field} style={{width: "100%"}} key={params.value}>
             <div>{params.key_name}</div>
             <select name={new_value_name}  defaultValue={params.value?.toString()} disabled={params.readonly?.at(0) || params.readonly?.at(1)}>
                 {params.selector.map((optString, i)=><option key={'option' + i} value={optString.toLocaleLowerCase()}>{optString}</option> )}
@@ -50,25 +52,25 @@ export default function Field(params: field_params)
     if(params.textarea)
     {
         const readOnly = params.readonly?.at(0) || params.readonly?.at(1)
-        const displayEditingView = !markdownProp.editingActive || readOnly
+        const displayMarkdownView = !markdownProp.editingActive || readOnly
         let custom_styles = {}
     
-        if(displayEditingView) custom_styles = {visibility: 'hidden', position: 'fixed'}
+        if(displayMarkdownView) custom_styles = {visibility: 'hidden', position: 'fixed'}
         
         const textAreaElement = 
         <textarea 
             name={new_value_name} 
             className={styles.textarea} 
             id="" 
-            readOnly={readOnly} 
+            readOnly={readOnly}
             defaultValue={markdownProp.content} 
             style={custom_styles}   
             onChange={(e)=>{setMarkdownProp({...markdownProp, content: e.target.value})}}
             onBlur={(e)=>{setMarkdownProp({...markdownProp, editingActive: false})}}
             ></textarea>
         
-        // If the field is read-only or editingActive is true, render it as markdown.
-        if(displayEditingView)
+        // If the field is read-only or editingActive is false, render it as markdown.
+        if(displayMarkdownView)
         {
             return <>
                 {textAreaElement}

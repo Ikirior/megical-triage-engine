@@ -104,17 +104,17 @@ export default function TriageSheet(params: triagesheetparams)
     return <form className={styles.sheet}>
             <h1 style={{'fontSize': "1.6em", "marginLeft": "4px"}}>Triage Sheet</h1>
                 <div style={{display: 'none'}}><input name='sheet_id' defaultValue={params.current_sheet_id ?? ''} readOnly></input></div>
-            <Topic name="Identification">
-                <Field current_sheet_id={triageSheet.id} name='name' key_name='Name' value={triageSheet.patient.name} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='cpf' key_name='CPF' value={triageSheet.patient.cpf} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='rg' key_name='RG' value={triageSheet.patient.rg} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='companion' key_name='Companion?' value={triageSheet.patient.companion ? 'Yes' : 'No'} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='address' key_name='Address' value={triageSheet.patient.address} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='birth_date' key_name='Birth Date' value={triageSheet.patient.birth_date} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='sex' key_name='Sex' value={triageSheet.patient.sex} readonly={[true, true]}/>
-                <Field current_sheet_id={triageSheet.id} name='phone_number' key_name='Phone Number' value={triageSheet.patient.phone_num} readonly={[true, true]}/>
+            <Topic name="Identification" disabled>
+                <Field current_sheet_id={triageSheet.id} name='name' key_name='Name' value={triageSheet.patient.name}/>
+                <Field current_sheet_id={triageSheet.id} name='cpf' key_name='CPF' value={triageSheet.patient.cpf}/>
+                <Field current_sheet_id={triageSheet.id} name='rg' key_name='RG' value={triageSheet.patient.rg}/>
+                <Field current_sheet_id={triageSheet.id} name='companion' key_name='Companion?' value={triageSheet.patient.companion ? 'Yes' : 'No'}/>
+                <Field current_sheet_id={triageSheet.id} name='address' key_name='Address' value={triageSheet.patient.address}/>
+                <Field current_sheet_id={triageSheet.id} name='birth_date' key_name='Birth Date' value={triageSheet.patient.birth_date} />
+                <Field current_sheet_id={triageSheet.id} name='sex' key_name='Sex' value={triageSheet.patient.sex}/>
+                <Field current_sheet_id={triageSheet.id} name='phone_number' key_name='Phone Number' value={triageSheet.patient.phone_num}/>
             </Topic>
-            <Topic name="Essentials">
+            <Topic name="Essentials" disabled={params.user_role != 'nurse'}>
                 <Field current_sheet_id={triageSheet.id} name='systolic_bp' key_name='Systolic BP' number value={triageSheet.triage_data?.vitals.systolic_bp} readonly={[true, false]}/>
                 <Field current_sheet_id={triageSheet.id} name='diastolic_bp'key_name='Diastolic BP' number value={triageSheet.triage_data?.vitals.diastolic_bp} readonly={[true, false]}/>
                 <Field current_sheet_id={triageSheet.id} name='heart_rate' key_name='Heart Rate' number value={triageSheet.triage_data?.vitals.diastolic_bp} readonly={[true, false]}/>
@@ -123,13 +123,13 @@ export default function TriageSheet(params: triagesheetparams)
                 {...extraVitalFields}
             </Topic>
 
-            <Topic name="Observations">
+            <Topic name="Observations" disabled={params.user_role != 'nurse'}>
                 <Field current_sheet_id={triageSheet.id} key_name='Nurse Observations' name='nurse_observations' value={triageSheet.triage_data?.nurse_initial_observations} textarea/>
             </Topic>
             
             <Topic name="Complementary Analysis with AI">
                 {triageSheet.triage_data?.investigation_qa?.map(((ai_question, i) => 
-                    <Field key={'ai_question_' + i} ai_info={ai_question} current_sheet_id={triageSheet.id} name={'AI-'+i} key_name={ai_question.question_text} value={ai_question.patient_answer} readonly={[true, false]}/>
+                    <Field key={'ai_question_' + i} ai_info={ai_question} current_sheet_id={triageSheet.id} name={'AI-'+i} key_name={ai_question.question_text} value={ai_question.patient_answer} readonly={params.user_role == 'nurse' ? [true, false] : [true, true]}/>
                 ))}
             </Topic>
 
@@ -165,7 +165,7 @@ export default function TriageSheet(params: triagesheetparams)
                         <SingleButton icon={<MessageCircleQuestionIcon/>} text="Generate Questions" alternativeStyle clientFormFunction={ReloadWrapper(FinishStepOne)} submit/>
                         <div className={styles.plus_button}>
                             <SingleButton icon={<PlusIcon/>} action={() => {
-                                setExtraVitalFields([...extraVitalFields, <Field name={'EXTRA-' + extraVitalFields.length} key_name='New Field' current_sheet_id={params.current_sheet_id ?? ''} value=''></Field>])
+                                setExtraVitalFields([...extraVitalFields, <Field name={'EXTRA-' + extraVitalFields.length} key_name='New Field' current_sheet_id={params.current_sheet_id ?? ''} value='' readonly={params.user_role == 'nurse' && params.current_step == 1 ? [false, false] : [true, true]}></Field>])
                             }}/>
                         </div>
                     </>
