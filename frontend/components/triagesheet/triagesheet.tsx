@@ -139,7 +139,7 @@ export default function TriageSheet(params: triagesheetparams)
             </Topic>
 
             <Topic name="Risk Evaluation">
-                <Field current_sheet_id={triageSheet.id} name='risk' key_name='Risk' value={triageSheet.patient.name} selector={["Azul", "Verde", "Amarelo", "Laranja", "Vermelho"]} readonly={params.current_step != 3 ? [true, true] : [false, false]}/>
+                <Field current_sheet_id={triageSheet.id} name='risk' key_name='Risk' value={triageSheet.triage_data?.risk_classification} selector={["Azul", "Verde", "Amarelo", "Laranja", "Vermelho"]} readonly={params.current_step != 3 ? [true, true] : [false, false]}/>
             </Topic>
 
 
@@ -150,11 +150,11 @@ export default function TriageSheet(params: triagesheetparams)
             </Topic>
 
             <Topic name="Doctor Notes">
-                <Field current_sheet_id={triageSheet.id} key_name='Doctor Notes' name='doctor_notes' value={triageSheet.doctor_data?.doctor_notes} textarea/>
+                <Field current_sheet_id={triageSheet.id} key_name='Doctor Notes' name='doctor_notes' value={triageSheet.doctor_data?.doctor_notes} textarea readonly={params.user_role == 'doctor' ? [false, false] : [true, true]}/>
             </Topic>
 
             <Topic name="Prescription">
-                <Field current_sheet_id={triageSheet.id} key_name='prescription' name='prescription' value={triageSheet.doctor_data?.prescription} textarea/>
+                <Field current_sheet_id={triageSheet.id} key_name='prescription' name='prescription' value={triageSheet.doctor_data?.prescription} textarea readonly={params.user_role == 'doctor' ? [false, false] : [true, true]}/>
             </Topic>
 
             <nav id="form-actions" className={[styles.actions, styles.form_actions].join(' ')}>
