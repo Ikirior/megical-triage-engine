@@ -1,9 +1,7 @@
 import style from '@/app/adminpanel/styles.module.css'
-import cell from '@/components/adminpanel/cell';
+import { cell } from '@/types/Cell';
 import UserGroup from '@/components/adminpanel/usergroup';
 import PathBar from "@/components/shared/pathbar/pathbar";
-import getTokenHeaderValue from '@/utils/getTokenHeader';
-import ResponseManager from '@/utils/responsemanager';
 import { JSX } from 'react';
 import getUsers from '../../services/adminpanel/getUsers';
 

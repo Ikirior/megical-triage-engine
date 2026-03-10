@@ -1,4 +1,4 @@
-type cell = {
+export type cell = {
     id: string,
     name: string,
     email: string,
@@ -9,5 +9,3 @@ type cell = {
     created_at: string,
     password?: string
 }
-
-export default cell;

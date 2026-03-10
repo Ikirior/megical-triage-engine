@@ -3,7 +3,7 @@
 import styles from "@/components/adminpanel/adminpanel.module.css"
 import SingleButton from "@/components/shared/singlebutton/singlebutton"
 import { Trash2Icon, SaveIcon, UserPlus2Icon } from "lucide-react"
-import cell from "./cell"
+import { cell } from "@/types/Cell";
 import DeleteUser from "../../services/adminpanel/del_user"
 import UpdateUser from "../../services/adminpanel/update_user";
 import AddUser from "../../services/adminpanel/add_user";
