@@ -1,8 +1,8 @@
 import DoctorPanel from "@/components/doctorpanel/doctorpanel";
-import GetDoctorQueue from "@/components/doctorpanel/getDoctorQueue";
-import PathBar from "@/components/pathbar/pathbar";
-import GetQeuePatients from "@/components/triagesheet/getQueuePatients";
-import { queueObj } from "@/components/triagesheet/types";
+import GetDoctorQueue from "@/services/doctorpanel/getDoctorQueue";
+import PathBar from "@/components/shared/pathbar/pathbar";
+import GetQeuePatients from "@/services/triagepanel/getQueuePatients";
+import { queueObj } from "@/types/types";
 
 export default async function Page() {
 

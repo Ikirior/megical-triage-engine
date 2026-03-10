@@ -1,4 +1,4 @@
-import styles from '@/components/navbar/navbar.module.css'
+import styles from '@/components/shared/navbar/navbar.module.css'
 import { Home, UserCircle2Icon } from "lucide-react"
 import { cookies } from 'next/headers'
 import Link from "next/link"

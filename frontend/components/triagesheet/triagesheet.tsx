@@ -3,19 +3,19 @@ import styles from '@/components/triagesheet/triagesheet.module.css'
 import Topic from './topic'
 import Field from './field'
 import { JSX, useEffect, useState } from 'react';
-import StartTriageSheet from './startTriageSheet';
-import { ServiceSheet, status, status_nums, STEP_MAPPING } from './types';
-import SingleButton from '../singlebutton/singlebutton';
+import StartTriageSheet from '../../services/triagepanel/startTriageSheet';
+import { ServiceSheet } from '@/types/ServiceSheet';
+import { status, status_nums, STEP_MAPPING } from '@/types/Status';
+import SingleButton from '@/components/shared/singlebutton/singlebutton';
 import { MessageCircleQuestionIcon, PlusIcon, Rocket, Send } from 'lucide-react';
-import GetTriageSheet from './getTriageSheet';
-import FinishStepOne from './sheet_actions/FinishStepOne';
-import FinishStepTwo from './sheet_actions/FinishStepTwo';
-import FinishStepThree from './sheet_actions/FinishStepThree';
-import Finish from '../doctorpanel/finish';
+import GetTriageSheet from '../../services/triagepanel/getTriageSheet';
+import FinishStepOne from '../../services/triagepanel/FinishStepOne';
+import FinishStepTwo from '../../services/triagepanel/FinishStepTwo';
+import FinishStepThree from '../../services/triagepanel/FinishStepThree';
+import Finish from '../../services/doctorpanel/finish';
 import { responseManagerResponse } from '@/utils/responsemanager';
-import StartDoctorSheet from '../doctorpanel/startDoctorSheet';
-import Markdown from 'react-markdown';
-import GetDoctorSheet from '../doctorpanel/getDoctorSheet';
+import StartDoctorSheet from '../../services/doctorpanel/startDoctorSheet';
+import GetDoctorSheet from '../../services/doctorpanel/getDoctorSheet';
 
 type triagesheetparams = {
     "current_sheet_id": string|null,

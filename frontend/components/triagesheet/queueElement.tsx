@@ -1,8 +1,8 @@
 'use client';
 
 import styles from '@/components/triagesheet/triagesheet.module.css'
-import { queueObj, STEP_MAPPING } from './types';
-import SingleButton from '../singlebutton/singlebutton';
+import { queueObj } from '@/types/Queue';
+import SingleButton from '@/components/shared/singlebutton/singlebutton';
 import { CheckSquare2Icon, PlaySquareIcon, SquareArrowUpRight } from 'lucide-react';
 
 

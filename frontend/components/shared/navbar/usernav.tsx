@@ -2,7 +2,7 @@
 import { Home, UserCircle2Icon } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react";
-import styles from '@/components/navbar/navbar.module.css'
+import styles from '@/components/shared/navbar/navbar.module.css'
 import logoff from "./logoff";
 
 export default function UserNav(params: {username: string})

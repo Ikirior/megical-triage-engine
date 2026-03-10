@@ -1,12 +1,12 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "../singlebutton/singlebutton"
+import SingleButton from "@/components/shared/singlebutton/singlebutton"
 import { Trash2Icon, SaveIcon, UserPlus2Icon } from "lucide-react"
 import cell from "./cell"
-import DeleteUser from "./del_user"
-import UpdateUser from "./update_user";
-import AddUser from "./add_user";
+import DeleteUser from "../../services/adminpanel/del_user"
+import UpdateUser from "../../services/adminpanel/update_user";
+import AddUser from "../../services/adminpanel/add_user";
 
 type usersection_params = {
     cell?: cell,

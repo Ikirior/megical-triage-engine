@@ -1,10 +1,5 @@
 'use client';
-import { useState } from "react";
-import styles from '@/components/triagesheet/triagesheet.module.css'
-import { ArrowLeft, CheckSquare2Icon, SquareArrowUpRight } from "lucide-react";
-import GetQeuePatients from "./getQueuePatients";
-import { queueObj, status } from "./types";
-import SingleButton from "../singlebutton/singlebutton";
+import { queueObj } from "@/types/Queue";
 import SidePanel from "./sidepanel";
 import QueueElement from "./queueElement";
 

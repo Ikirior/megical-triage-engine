@@ -1,7 +1,7 @@
 import styles from '@/app/home.module.css'
 import { cookies } from 'next/headers';
 import { decode } from 'jsonwebtoken';
-import SingleButton from '@/components/singlebutton/singlebutton';
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
 import { Link2, LogInIcon } from 'lucide-react';
 import Link from 'next/link';
 

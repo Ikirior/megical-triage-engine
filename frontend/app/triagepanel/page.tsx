@@ -1,7 +1,7 @@
-import PathBar from "@/components/pathbar/pathbar";
-import GetQeuePatients from "@/components/triagesheet/getQueuePatients";
+import PathBar from "@/components/shared/pathbar/pathbar";
+import GetQeuePatients from "@/services/triagepanel/getQueuePatients";
 import TriagePanel from "@/components/triagesheet/triagepanel";
-import { queueObj } from "@/components/triagesheet/types";
+import { queueObj } from "@/types/types";
 
 export default async function Page() {
 

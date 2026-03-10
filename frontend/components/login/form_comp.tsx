@@ -1,5 +1,5 @@
 'use client';
-import styles from "@/components/form/form_comp.module.css"
+import styles from "@/components/login/form_comp.module.css"
 import Link from "next/link"
 import Login from "./login"
 import { useActionState, useState } from "react";

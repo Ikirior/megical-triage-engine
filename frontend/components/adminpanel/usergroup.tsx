@@ -1,7 +1,7 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "../singlebutton/singlebutton"
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
 import {UserPlus2 } from "lucide-react"
 import UserSection from "./usersection"
 import cell from "./cell"

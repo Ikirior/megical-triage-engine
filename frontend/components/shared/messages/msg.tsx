@@ -1,6 +1,6 @@
 'use client';
 
-import styles from '@/components/messages/msg.module.css'
+import styles from '@/components/shared/messages/msg.module.css'
 import { MessageSquareWarningIcon, X } from "lucide-react"
 import { useState } from 'react';
 

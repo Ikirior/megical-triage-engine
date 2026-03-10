@@ -1,9 +1,9 @@
 'use client';
 
 import styles from '@/components/triagesheet/triagesheet.module.css'
-import { ArrowDown, ArrowDownIcon, BrainCircuitIcon } from 'lucide-react';
+import { ArrowDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { investigation_qa_obj } from './types';
+import { investigation_qa_obj } from '@/types/InvestigationQA';
 import Markdown from 'react-markdown';
 
 type field_params = {

@@ -1,6 +1,6 @@
 'use client';
 
-import styles from "@/components/singlebutton/singlebutton.module.css"
+import styles from "@/components/shared/singlebutton/singlebutton.module.css"
 import { responseManagerResponse } from "@/utils/responsemanager";
 import { JSX, MouseEventHandler, useActionState } from "react"
 import Message from "../messages/msg";

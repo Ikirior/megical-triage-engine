@@ -1,4 +1,4 @@
-type patient = {
+export type patient = {
   "_id": string,
   "name": string,
   "cpf": string,
@@ -10,4 +10,3 @@ type patient = {
   "sex": string,
   "phone_num": string
 }
-export default patient;

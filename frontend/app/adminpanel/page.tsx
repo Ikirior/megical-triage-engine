@@ -1,28 +1,13 @@
 import style from '@/app/adminpanel/styles.module.css'
 import cell from '@/components/adminpanel/cell';
 import UserGroup from '@/components/adminpanel/usergroup';
-import PathBar from "@/components/pathbar/pathbar";
+import PathBar from "@/components/shared/pathbar/pathbar";
 import getTokenHeaderValue from '@/utils/getTokenHeader';
 import ResponseManager from '@/utils/responsemanager';
 import { JSX } from 'react';
+import getUsers from '../../services/adminpanel/getUsers';
 
 export const dynamic='force-dynamic';
-
-async function getUsers()
-{
-    // Handling User Fetch
-  let res = await fetch('http://backend_server:3001/users/',
-    {
-      headers: {
-        'Authorization': `${await getTokenHeaderValue()}`
-      }
-    }
-  )
-  const managerRes = await ResponseManager(res);
-
-  return managerRes;
-
-}
 
 export default async function Page() {
 

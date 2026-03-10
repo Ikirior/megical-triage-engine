@@ -1,6 +1,6 @@
 'use server';
 
-import Message from "@/components/messages/msg";
+import Message from "@/components/shared/messages/msg";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { JSX } from "react";

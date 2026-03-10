@@ -1,6 +1,6 @@
 'use client';
 
-import styles from '@/components/singlebutton/singlebutton.module.css'
+import styles from '@/components/shared/singlebutton/singlebutton.module.css'
 import { Loader2Icon } from "lucide-react"
 
 export default function LoadingOverlay()

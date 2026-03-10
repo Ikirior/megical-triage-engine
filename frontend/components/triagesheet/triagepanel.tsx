@@ -1,10 +1,9 @@
 'use client';
 import TriageSheet from "@/components/triagesheet/triagesheet";
-import { Send, Rocket, PlusIcon, MessageCircleQuestionIcon } from "lucide-react";
-import SingleButton from "@/components/singlebutton/singlebutton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TriageQueue from "./triagequeue";
-import { queueObj, ServiceSheet, status_nums } from "./types";
+import { queueObj } from "@/types/Queue";
+import { status_nums } from "@/types/Status";
 import StepSection from "./stepsection";
 import styles from '@/components/triagesheet/triagesheet.module.css'
 

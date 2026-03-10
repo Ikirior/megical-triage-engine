@@ -1,12 +1,12 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "@/components/singlebutton/singlebutton";
-import { Trash2Icon, SaveIcon, UserPlus2Icon, ListPlusIcon } from "lucide-react"
-import UpdatePatient from "./update_patient";
-import AddPatient from "./add_patient";
-import patient from "./patient";
-import SendToQueue from "./sendtoqueue";
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
+import { SaveIcon, UserPlus2Icon, ListPlusIcon } from "lucide-react"
+import UpdatePatient from "../../services/patientregistry/update_patient";
+import AddPatient from "../../services/patientregistry/add_patient";
+import { patient } from "@/types/Patient";
+import SendToQueue from "../../services/patientregistry/sendtoqueue";
 
 type usersection_params = {
     cell?: patient,

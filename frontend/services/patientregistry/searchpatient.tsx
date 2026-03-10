@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from "react";
-import PatientGroup from "./patientgroup";
+import PatientGroup from "../../components/patientregistry/patientgroup";
 import GetPatient from "./get_patient";
 import { SearchIcon } from "lucide-react";
-import patient from "./patient";
+import patient from "../../types/Patient";
 
 export default function SearchPatient()
 {

@@ -1,4 +1,4 @@
-import styles from "@/components/pathbar/pathbar.module.css"
+import styles from "./pathbar.module.css"
 
 type params_type = {
     path: string;

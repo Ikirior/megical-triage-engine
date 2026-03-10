@@ -1,6 +1,6 @@
 import style from '@/app/adminpanel/styles.module.css'
-import PathBar from "@/components/pathbar/pathbar";
-import SearchPatient from '../../components/patientregistry/searchpatient';
+import PathBar from "@/components/shared/pathbar/pathbar";
+import SearchPatient from '../../services/patientregistry/searchpatient';
 export const dynamic='force-dynamic';
 
 
