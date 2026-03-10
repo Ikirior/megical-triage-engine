@@ -2,7 +2,7 @@
 
 import getTokenHeaderValue from "@/utils/getTokenHeader";
 import ResponseManager, { responseManagerResponse } from "@/utils/responsemanager";
-import { investigation_qa_obj } from "../../types/types";
+import { investigation_qa_obj } from "@/types/InvestigationQA";
 
 export default async function FinishStepTwo(initialState: responseManagerResponse, args: FormData) {
 
