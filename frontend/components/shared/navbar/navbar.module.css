@@ -11,26 +11,64 @@
     padding: 10px;
     background-color: var(--midtone);
     color: white;
-    z-index: 1;
+    z-index: 2;
     margin-bottom: 4vh;
 }
 
+
+/*option panel*/
 .side
 {
-    position: absolute;
-    bottom: -0.5em;
+    position: relative;
     background-color: var(--shadow);
     min-width: 5vw;
+    height: fit-content;
     display: flex;
     flex-direction: column;
+    padding: 2px;
+    z-index: 30;
+    animation: open_side forwards 500ms;
+    transform-origin: top;
+}
+
+@keyframes open_side {
+    0%{
+        transform: scaleY(0)
+    }
 }
 
 .side > *
 {
     cursor: pointer;
 }
+.side > *:hover
+{
+    background-color: rgba(255, 255, 255, 0.301);
+}
 
+/*profile name and user icon*/
+.userinfo
+{
+    display: flex;
+    flex-direction: row;
+    gap: 1vw;
+}
+
+/*whole section within the navbar*/
 .userprofile
 {
     cursor: pointer;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    height: 2vh;
+}
+
+/*username text*/
+.username
+{
+    display: flex;
+    flex-direction: column;
+    min-width: 5vw;
+    text-align: right;
 }
