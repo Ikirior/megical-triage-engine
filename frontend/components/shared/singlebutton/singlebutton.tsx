@@ -2,7 +2,7 @@
 
 import styles from "@/components/shared/singlebutton/singlebutton.module.css"
 import { responseManagerResponse } from "@/utils/responsemanager";
-import { JSX, MouseEventHandler, useActionState } from "react"
+import { JSX, MouseEventHandler, useActionState, useEffect, useState } from "react"
 import Message from "../messages/msg";
 import LoadingOverlay from "./loading";
 import { Loader2Icon } from "lucide-react";
@@ -59,14 +59,31 @@ type singlebutton_params = {
 
 export default function SingleButton(params: singlebutton_params)
 {
-    const error_msg:JSX.Element[] = [];
+    const [errorMsgs, setErrorMsgs] = useState([] as JSX.Element[]);
     let action_func = undefined
     let loading = false;
     let icon:JSX.Element = params.icon;
     let showSuccessMessage = false;
     if(params?.formAction)
         {
-            const [state, action, isPending] = useActionState(params.formAction, {"msg": null, "success": false})
+            const [state, action, isPending] = useActionState(params.formAction, {"msg": null, "success": true})
+
+            useEffect(()=>
+                {
+                    if(!state.success && state.msg)
+                    {
+                        const newMsg = state.msg;
+                        let messagesStack = [...errorMsgs, state.msg];
+                        newMsg.key = 'error-msg-'+Date.now();
+                        if (messagesStack.length > 3)
+                            messagesStack.shift();
+
+                        setErrorMsgs(messagesStack);
+                    }
+                    else if(state.success && params.successMessage)
+                        showSuccessMessage = true;
+                }, [state]);
+
             action_func = action;
             loading = isPending;
 
@@ -74,11 +91,6 @@ export default function SingleButton(params: singlebutton_params)
             {
                 icon = <Loader2Icon color={icon.props.color ?? 'black'} className={styles.load_anim}/>
             }
-
-            if(!state.success && state.msg)
-                error_msg.push(state.msg)
-            else if(state.success && params.successMessage)
-                showSuccessMessage = true;
         
         }
     
@@ -92,7 +104,7 @@ export default function SingleButton(params: singlebutton_params)
 
     return (
         <>
-            {...error_msg}
+            {...errorMsgs}
             {showSuccessMessage && params.successMessage && !loading && <Message backgroundColor="rgb(146, 255, 179)" text={params.successMessage}/>}
             {
                 (loading && params.criticalOverlay) &&
