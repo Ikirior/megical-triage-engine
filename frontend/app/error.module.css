@@ -1,0 +1,21 @@
+.error_page
+{
+  margin: auto;
+  width: fit-content;
+}
+
+.error_page h1
+{
+    font-size: 3em;
+    display: inline;
+}
+
+.error_page h2
+{
+    font-size: 1.5em;
+}
+
+.error_page button
+{
+    margin: 2vh auto auto auto;
+}
