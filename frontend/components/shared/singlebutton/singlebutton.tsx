@@ -47,7 +47,13 @@ type singlebutton_params = {
      * Switch to an alternative style.
      */
     alternativeStyle?: boolean,
+    /**
+     * If true, covers the screen during loading, to avoid any other actions.
+     */
     criticalOverlay?: boolean,
+    /**
+     * If set, it is shown upon form action success.
+     */
     successMessage?: string
 }
 
