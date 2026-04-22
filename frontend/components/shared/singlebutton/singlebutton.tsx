@@ -10,12 +10,42 @@ import { Loader2Icon } from "lucide-react";
 type singlebutton_params = {
     icon: any,
     backgroudColor?: string,
+    /**
+     * Button text.
+     */
     text?: string,
+    /**
+     * Client function or server action to execute. This does not come with automatic error display.
+     */
     action?: Function,
+    /**
+     * Is this a submit button for a Form element?
+     */
     submit?: boolean,
+    /**
+     * A function that runs a form action associated with a server request. Automatically exposes an error if it is returned by the ResponseManager.
+     * > Warning: this function requires the returned value to come from `ResponseManager`. Therefore, only use this if you are going to make a request to the backend server.
+     * > Warning: to submit, make sure submit=true.
+     * @param initialState Its first value.
+     * @param args FormData.
+     * @returns 
+     */
     formAction?: (initialState:responseManagerResponse, args:FormData) => Promise<responseManagerResponse>,
+    
+    /**
+     * Text to display on hover.
+     */
     title?: string,
+
+    /**
+     * Form function.
+     * @param args 
+     * @returns 
+     */
     clientFormFunction?: (args: FormData) => void,
+    /**
+     * Switch to an alternative style.
+     */
     alternativeStyle?: boolean,
     criticalOverlay?: boolean,
     successMessage?: string
