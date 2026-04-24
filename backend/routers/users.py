@@ -3,7 +3,7 @@ from http import HTTPStatus
 from typing import List
 
 from models import User
-from contracts import UserCreate, UserResponse, UserUpdate
+from contracts import UserCreate, UserResponse, UserUpdate, UserUpdatePassword
 from services.users import UserService
 from dependencies import get_current_admin_user, get_current_user
 from exceptions import UserNotFoundError, DuplicateUserError
@@ -125,6 +125,33 @@ async def delete_user(user_id: str, current_admin: User = Depends(get_current_ad
     try:
         deleted_user = await UserService.delete_user(user_id)
         return deleted_user
+    
+    except UserNotFoundError:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Incorrect user ID or user does not exist in the database."
+        )
+
+
+@router.put("/resetpassword/", response_model = UserResponse)
+async def update_user(user_update_password: UserUpdatePassword):
+    """
+    Updates the user password.
+
+    Args:
+        token: token.
+        password: new user password.
+
+    Returns:
+        The updated User object formatted as a UserResponse DTO.
+
+    Raises:
+        HTTPException: If the user ID does not exist in the database (HTTP 404).
+    """
+    
+    try:
+        updated_user = await UserService.change_user_password(user_update_password)
+        return updated_user
     
     except UserNotFoundError:
         raise HTTPException(

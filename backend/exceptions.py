@@ -49,3 +49,7 @@ class InvalidConsultationStateError(Exception):
 class UnauthorizedDoctorError(Exception):
     """Raised when a doctor attempts to modify a consultation assigned to another doctor."""
     pass
+
+class InadequateTokenError(Exception):
+    """Raised when a token is used to authenticate, but that token is inadequate for the action it is being used for. This means it might have expired or might have been issued for another purpose."""
+    pass

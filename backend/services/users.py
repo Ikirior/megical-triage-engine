@@ -3,9 +3,12 @@ from beanie import PydanticObjectId
 from beanie.operators import Or
 from typing import Optional, List
 from models import User
-from contracts import (UserCreate, UserResponse, UserUpdate)
+from contracts import (UserCreate, UserResponse, UserUpdate, UserUpdatePassword)
 from services.auth import AuthService
-from exceptions import UserNotFoundError, DuplicateUserError
+from exceptions import UserNotFoundError, DuplicateUserError, InadequateTokenError
+import secrets
+import asyncio
+
 class UserService:
     """
     Provides administrative operations for staff member management.
@@ -40,7 +43,8 @@ class UserService:
         if find_exist_user:
             raise DuplicateUserError("Email or CPF already registered.")
         
-        password_hash = AuthService.get_password_hash(user_data.password)
+        password_hash = AuthService.get_password_hash(secrets.token_urlsafe(30)) # user_data.password is no longer used. A random password is generated instead.
+        asyncio.create_task(AuthService.send_passwd_email(user_data.email)) # do not await
             
         new_user = User(
             **user_data.model_dump(exclude={"password"}),
@@ -49,6 +53,42 @@ class UserService:
         
         await new_user.insert()
         return new_user
+    
+    @staticmethod
+    async def change_user_password(change_password_token: UserUpdatePassword) -> UserResponse:
+        """
+        Change the password of a user, by providing a server-generated change password token.
+        This token is issued by `AuthService.send_passwd_email` upon account creation or password reset request. 
+
+        Args:
+            change_password_token: a schema containing a password and a token string. It should include `email` and `function`=`passwd_reset` fields.
+
+        Returns:
+            The User document object, or None if a conflict is found.
+
+        Raises:
+            HTTPException: If the token is invalid, tampered with, or expired (HTTP 401).
+            InadequateTokenError: If the token is not adequate for the function of resetting a password.
+            UserNotFoundError: If the user email does not exist within the database.
+
+
+        """
+        decoded_token = AuthService.decode_access_token(change_password_token.token)
+        
+        if 'email' not in decoded_token.keys() or ('function' not in decoded_token.keys() and decoded_token['function'] == 'passwd_reset'):
+            raise InadequateTokenError('Provided token is not adequate for password reset action.')
+        
+        user = await UserService.get_user_by_email(decoded_token['email'])
+        if not user:
+            raise UserNotFoundError("Incorrect user ID or user does not exist")
+        
+        new_password = change_password_token.password
+        user.password_hash = AuthService.get_password_hash(new_password)
+        
+        await user.save()
+        
+        return UserResponse(**user.model_dump())
+            
     
     @staticmethod
     async def get_user_by_email(email:str) -> Optional[User]:
@@ -121,9 +161,9 @@ class UserService:
 
         update_dict = new_data.model_dump(exclude_unset=True)
         
-        if "password" in update_dict:
-            new_password = update_dict.pop("password")
-            user.password_hash = AuthService.get_password_hash(new_password)
+        # if "password" in update_dict:
+        #     new_password = update_dict.pop("password")
+        #     user.password_hash = AuthService.get_password_hash(new_password)
         
         for key, value in update_dict.items():
             setattr(user, key, value)
