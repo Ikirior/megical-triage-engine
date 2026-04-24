@@ -32,8 +32,6 @@ export default function UserSection(params: usersection_params)
                     <input type="text" name="specialization" id={node_id+'specialization'} defaultValue={params.cell?.specialization} placeholder="Dermatology"/>
                     <input type="text" name="role" id={node_id+'role'} value={params.role ?? params.cell?.role} readOnly placeholder="---" required={params.newUser}/>
                     <input type="text" name="created_at" id={node_id+'created_at'} value={params.cell?.created_at && new Date(params.cell?.created_at).toString()} placeholder="---" readOnly/>
-
-                    <input type="password" name="password" id={node_id+'password'} placeholder={params.newUser ? 'Insert New Password' : 'Click to change password'} required={params.newUser} pattern=".{8}.*"/>
             </div>
             <div className={styles.sectionbuttons}>
                 {

@@ -143,8 +143,7 @@ class UserService:
         """
         Updates specific fields of an existing user.
 
-        Supports partial updates. If a new password is provided, it is
-        automatically re-hashed before saving.
+        Supports partial updates. Passwords are not accepted. For a password change, the `change_user_password` service should be called instead.
 
         Args:
             user_id: The ID of the user to be updated.
@@ -161,9 +160,8 @@ class UserService:
 
         update_dict = new_data.model_dump(exclude_unset=True)
         
-        # if "password" in update_dict:
-        #     new_password = update_dict.pop("password")
-        #     user.password_hash = AuthService.get_password_hash(new_password)
+        if "password" in update_dict:
+            update_dict.pop("password")
         
         for key, value in update_dict.items():
             setattr(user, key, value)

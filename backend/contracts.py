@@ -36,7 +36,7 @@ class UserBase(BaseModel):
     specialization: Optional[str] = None
 
 class UserCreate(UserBase):
-    password: str
+    pass
 
 class UserUpdatePassword(BaseModel):
     token: str
@@ -50,7 +50,6 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     specialization: Optional[str] = None
-    password: Optional[str] = None
 
 class UserResponse(UserBase):
     id: PydanticObjectId

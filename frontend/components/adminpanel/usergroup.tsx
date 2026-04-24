@@ -32,7 +32,7 @@ export default function UserGroup(params: usergroupparams)
         }
     ).toArray();
 
-    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date', 'Password']
+    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date']
     const keyElements = KEYS.map((element, i) => <div key={'key-'+i}>{element}</div>)
 
     return (
