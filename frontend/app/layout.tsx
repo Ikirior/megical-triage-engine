@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navbar/>
-        <main style={{width: "100%", height: "100%"}}>
+        <main style={{width: "100%", height: "100%", marginTop: "10vh"}}>
         {children}
         </main>
       </body>
