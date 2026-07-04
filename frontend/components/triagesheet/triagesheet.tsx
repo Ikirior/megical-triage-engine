@@ -117,9 +117,9 @@ export default function TriageSheet(params: triagesheetparams)
             <Topic name="Essentials" disabled={params.user_role != 'nurse'}>
                 <Field current_sheet_id={triageSheet.id} name='systolic_bp' key_name='Systolic BP' number value={triageSheet.triage_data?.vitals.systolic_bp} readonly={[true, false]}/>
                 <Field current_sheet_id={triageSheet.id} name='diastolic_bp'key_name='Diastolic BP' number value={triageSheet.triage_data?.vitals.diastolic_bp} readonly={[true, false]}/>
-                <Field current_sheet_id={triageSheet.id} name='heart_rate' key_name='Heart Rate' number value={triageSheet.triage_data?.vitals.diastolic_bp} readonly={[true, false]}/>
+                <Field current_sheet_id={triageSheet.id} name='heart_rate' key_name='Heart Rate' number value={triageSheet.triage_data?.vitals.heart_rate} readonly={[true, false]}/>
                 <Field current_sheet_id={triageSheet.id} name='temperature' key_name='Temperature' number value={triageSheet.triage_data?.vitals.temperature} readonly={[true, false]}/>
-                <Field current_sheet_id={triageSheet.id} name='oxygen_saturation' key_name='Oxygen Saturation' number value={triageSheet.triage_data?.vitals.diastolic_bp} readonly={[true, false]}/>
+                <Field current_sheet_id={triageSheet.id} name='oxygen_saturation' key_name='Oxygen Saturation' number value={triageSheet.triage_data?.vitals.oxygen_saturation} readonly={[true, false]}/>
                 {...extraVitalFields}
             </Topic>
 
