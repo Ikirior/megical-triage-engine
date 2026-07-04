@@ -91,6 +91,12 @@
     position: absolute;
     right: 4px;
     cursor: pointer;
+    background-image: linear-gradient(89deg, #fbdbdbe6, #fdd8d9);
+}
+
+.ai_question input[type='text']
+{
+    padding-right: 2vw;
 }
 
 .ai_reasoning

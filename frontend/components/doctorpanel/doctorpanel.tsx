@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 ;
 import StepSection from "../triagesheet/stepsection";
 import styles from '@/components/triagesheet/triagesheet.module.css'
-import { queueObj, status_nums } from "../triagesheet/types";
+import { queueObj, status_nums } from "../../types/types";
 import TriageQueue from "../triagesheet/triagequeue";
 
 // current_patient_id

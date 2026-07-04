@@ -1,10 +1,10 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "../singlebutton/singlebutton"
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
 import {UserPlus2 } from "lucide-react"
 import UserSection from "./usersection"
-import cell from "./cell"
+import { cell } from "@/types/Cell";
 import { useState } from "react";
 
 type usergroupparams = {
@@ -32,7 +32,7 @@ export default function UserGroup(params: usergroupparams)
         }
     ).toArray();
 
-    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date', 'Password']
+    const KEYS=['Id', 'RG', 'CPF', 'Name', 'E-mail', 'Specialization', 'Role', 'Creation Date']
     const keyElements = KEYS.map((element, i) => <div key={'key-'+i}>{element}</div>)
 
     return (

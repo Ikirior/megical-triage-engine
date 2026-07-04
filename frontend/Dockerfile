@@ -2,8 +2,7 @@ FROM node
 
 WORKDIR /src/
 
-COPY package*.json .
+COPY entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
-RUN npm install
-
-CMD ["npm", "run", "dev"]
+ENTRYPOINT ["/entrypoint.sh"]

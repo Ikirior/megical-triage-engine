@@ -1,9 +1,9 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "@/components/singlebutton/singlebutton";
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
 import {UserPlus2 } from "lucide-react"
-import patient from "./patient";
+import { patient } from "@/types/Patient";
 import { useState } from "react";
 import PatientSection from "./patientsection";
 

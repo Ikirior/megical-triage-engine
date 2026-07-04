@@ -1,12 +1,12 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "@/components/singlebutton/singlebutton";
-import { Trash2Icon, SaveIcon, UserPlus2Icon, ListPlusIcon } from "lucide-react"
-import UpdatePatient from "./update_patient";
-import AddPatient from "./add_patient";
-import patient from "./patient";
-import SendToQueue from "./sendtoqueue";
+import SingleButton from "@/components/shared/singlebutton/singlebutton";
+import { SaveIcon, UserPlus2Icon, ListPlusIcon } from "lucide-react"
+import UpdatePatient from "../../services/patientregistry/update_patient";
+import AddPatient from "../../services/patientregistry/add_patient";
+import { patient } from "@/types/Patient";
+import SendToQueue from "../../services/patientregistry/sendtoqueue";
 
 type usersection_params = {
     cell?: patient,
@@ -54,13 +54,9 @@ export default function PatientSection(params: usersection_params)
                         <SingleButton icon={<ListPlusIcon/>} backgroudColor="#5ebfff" submit={true} formAction={async (initialState, args) => {
                                 
                                 const resMan = await SendToQueue(initialState, args);
-                                if(resMan.success)
-                                {
-                                    alert(params.cell?.name + ' was sent to the queue.');
-                                }
                                 return resMan;
                                 
-                                }} title="send user to queue"/>
+                                }} title="send patient to queue" successMessage="Patient sent to queue."/>
                         <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
                             
                             const resMan = await UpdatePatient(initialState, args);
@@ -73,7 +69,7 @@ export default function PatientSection(params: usersection_params)
                             }
                             return resMan;
                             
-                            }} title="update user"/>
+                            }} title="update patient" successMessage="Patient updated successfully."/>
                     </>
                 }
                 {

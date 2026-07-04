@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import BaseModel, Field, EmailStr
 from enum import Enum
 from datetime import datetime, date, timedelta
@@ -35,6 +36,10 @@ class UserBase(BaseModel):
     specialization: Optional[str] = None
 
 class UserCreate(UserBase):
+    pass
+
+class UserUpdatePassword(BaseModel):
+    token: str
     password: str
 
 class UserLogin(BaseModel):
@@ -45,7 +50,6 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     specialization: Optional[str] = None
-    password: Optional[str] = None
 
 class UserResponse(UserBase):
     id: PydanticObjectId
@@ -67,12 +71,6 @@ class PatientUpdate(BaseModel):
     companion: Optional[bool] = None
     phone_num: Optional[str] = None
     sex: Optional[SexEnum] = None
-
-class PatientHistoryItem(BaseModel):
-    patient_id: PydanticObjectId
-    created_at: datetime
-    triage_data: Optional[TriageData] = None
-    doctor_data: Optional[DoctorData] = None
 
 class Vitals(BaseModel):
     systolic_bp: int = Field(..., description = "Pressão Sistólica (ex: 120)")
@@ -171,6 +169,21 @@ class InvestigationDecision(BaseModel):
     questions: List[GeneratedQuestion] = Field(default_factory=list)
 
 class ClinicalSuggestion(BaseModel):
-    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(description="Risk classification according to the standard 5-level clinical severity guidelines")
-    technical_summary: str = Field(description="Clinical summary in bullet points for nursing.")
-    observation_points: List[str] = Field(description="Specific warning signs for the doctor.")
+    risk_color: Literal["azul", "verde", "amarelo", "laranja", "vermelho"] = Field(
+        description="Risk classification according to the standard 5-level clinical severity guidelines"
+    )
+    technical_summary: List[str] = Field(
+        description="Clinical summary in bullet points for nursing."
+    )
+    observation_points: List[str] = Field(
+        description="Specific warning signs for the doctor."
+    )
+
+class PatientHistoryItem(BaseModel):
+    patient_id: PydanticObjectId
+    created_at: datetime
+    triage_data: Optional[TriageData] = None
+    doctor_data: Optional[DoctorData] = None
+
+class CloudLLMResponse(BaseModel):
+    response: str = None

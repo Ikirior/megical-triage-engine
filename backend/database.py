@@ -1,6 +1,7 @@
 import os
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+import json
 
 from models import User, Patient, ServiceSheet
 from services.auth import AuthService
@@ -36,6 +37,27 @@ async def _seed_default_admin():
         
         print(f"System Seed: Default admin created with email '{admin_email}'.")
 
+async def _seed_default_script():
+
+    content = ''
+    with open('default_users.jsonl', 'rt') as file:
+        content = file.read()
+    if len(content) > 0:
+        users_list = [json.loads(obj) for obj in content.split('\n')]
+        for user_dict in users_list:
+        
+            existing_user = await User.find_one(User.email == user_dict['email'])
+
+            if not existing_user:
+                password_hash = AuthService.get_password_hash(user_dict['password_hash'])
+                user_dict['password_hash'] = password_hash
+
+                new_user = User(**user_dict)
+                await new_user.insert()
+                print(f"[SEEDER]: inserted user {user_dict['name']}.")
+            else:
+                print(f"[SEEDER]: Skipped user {user_dict['name']}, as their e-mail is already in the database.")
+
 async def init_db():
     """
     Initializes the MongoDB connection and configures the Beanie ODM.
@@ -57,3 +79,4 @@ async def init_db():
     )
     
     await _seed_default_admin()
+    await _seed_default_script()

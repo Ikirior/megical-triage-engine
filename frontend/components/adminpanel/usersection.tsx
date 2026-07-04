@@ -1,12 +1,12 @@
 'use client';
 
 import styles from "@/components/adminpanel/adminpanel.module.css"
-import SingleButton from "../singlebutton/singlebutton"
+import SingleButton from "@/components/shared/singlebutton/singlebutton"
 import { Trash2Icon, SaveIcon, UserPlus2Icon } from "lucide-react"
-import cell from "./cell"
-import DeleteUser from "./del_user"
-import UpdateUser from "./update_user";
-import AddUser from "./add_user";
+import { cell } from "@/types/Cell";
+import DeleteUser from "../../services/adminpanel/del_user"
+import UpdateUser from "../../services/adminpanel/update_user";
+import AddUser from "../../services/adminpanel/add_user";
 
 type usersection_params = {
     cell?: cell,
@@ -32,8 +32,6 @@ export default function UserSection(params: usersection_params)
                     <input type="text" name="specialization" id={node_id+'specialization'} defaultValue={params.cell?.specialization} placeholder="Dermatology"/>
                     <input type="text" name="role" id={node_id+'role'} value={params.role ?? params.cell?.role} readOnly placeholder="---" required={params.newUser}/>
                     <input type="text" name="created_at" id={node_id+'created_at'} value={params.cell?.created_at && new Date(params.cell?.created_at).toString()} placeholder="---" readOnly/>
-
-                    <input type="password" name="password" id={node_id+'password'} placeholder={params.newUser ? 'Insert New Password' : 'Click to change password'} required={params.newUser} pattern=".{8}.*"/>
             </div>
             <div className={styles.sectionbuttons}>
                 {
@@ -50,7 +48,7 @@ export default function UserSection(params: usersection_params)
                             return resMan;
                             
                             }} title="delete user"/>
-                        <SingleButton icon={<SaveIcon/>} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
+                        <SingleButton icon={<SaveIcon/>} successMessage={`User updated successfully.`} backgroudColor="#5eff79" submit={true} formAction={async (initialState, args) => {
                             
                             const resMan = await UpdateUser(initialState, args);
                             if(resMan.success && params.setUsers && params.usersState)

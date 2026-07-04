@@ -193,7 +193,7 @@ async def get_triage_session(sheet_id: PydanticObjectId, current_nurse: User = D
         if session_data.nurse_ref != current_nurse.id:
             raise HTTPException(
                 status_code=HTTPStatus.UNAUTHORIZED,
-                detail="Nurse trying to access data that he does not have access to."
+                detail="Nurse trying to access data that they do not have access to."
             )
         
         return session_data

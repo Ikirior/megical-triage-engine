@@ -1,4 +1,4 @@
-import FormComp from "@/components/form/form_comp";
+import FormComp from "@/components/login/form_comp";
 import style from '@/app/login/styles.module.css'
 
 export default function LoginPage() {

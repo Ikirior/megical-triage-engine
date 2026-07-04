@@ -6,6 +6,8 @@ from jose import jwt, JWTError
 from dotenv import load_dotenv
 from fastapi import HTTPException, status
 from models import User
+import smtplib
+from email.mime.text import MIMEText
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", ".env.back"))
@@ -140,3 +142,45 @@ class AuthService:
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        
+    @staticmethod
+    async def send_passwd_email(email: str) -> bool:
+        """
+        Given an e-mail address, sends a password reset e-mail.
+
+        Args:
+            email: the e-mail address to send a message to.
+
+        Returns:
+            If the operation was successful.
+
+        Raises:
+            HTTPException: If the token is invalid, tampered with, or expired (HTTP 401).
+        """
+        
+        sending_email = os.getenv('SMTP_SERVER_EMAIL')
+
+        content = ''
+
+        token = AuthService.create_access_token({'email': email, 'function': 'passwd_reset'}, )
+        frontend_page_url = f"http://{os.getenv('FRONTEND_HOSTNAME')}/resetpassword/?token={token}"
+
+        html_path = os.path.join(os.getcwd(), 'static', 'email.html')
+        with open(html_path) as html_file:
+            content = html_file.read()
+            content = content.replace('$USER', email)
+            content = content.replace('$HREF', frontend_page_url)
+
+
+        # https://mailtrap.io/blog/python-send-email-gmail/#Send-HTML-email
+        message = MIMEText(content, 'html')
+        message['Subject'] = 'Enable yout MTE account'
+        message['From'] = sending_email
+        message['To'] = email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(
+                user=sending_email,
+                password=os.getenv('SMTP_APP_KEY')
+            )
+            server.sendmail(sending_email, email, message.as_string()) 
+            return True
