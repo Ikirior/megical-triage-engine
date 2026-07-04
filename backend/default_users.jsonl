@@ -1,3 +1,3 @@
-{"name": "Roberto", "email": "rec@example.com", "cpf": "180.120.300-32", "rg": "19.890.289-82", "role": "receptionist", "password_hash": "Rec0407"}
-{"name": "Lívia", "email": "enf@example.com", "cpf": "530.383.920-76", "rg": "20.632.436-22", "role": "nurse", "password_hash": "Nur0407", "specialization": "Injury Assessment"}
-{"name": "Carlos", "email": "doc@example.com", "cpf": "824.853.285-53", "rg": "84.245.521-90", "role": "doctor", "password_hash": "Doc0407", "specialization": "Dermatology"}
+{"name": "Roberto", "email": "rec@example.com", "cpf": "180.120.300-32", "rg": "19.890.289-8", "role": "receptionist", "password_hash": "Rec0407"}
+{"name": "Lívia", "email": "enf@example.com", "cpf": "530.383.920-76", "rg": "20.632.436-2", "role": "nurse", "password_hash": "Nur0407", "specialization": "Injury Assessment"}
+{"name": "Carlos", "email": "doc@example.com", "cpf": "824.853.285-53", "rg": "84.245.521-9", "role": "doctor", "password_hash": "Doc0407", "specialization": "Dermatology"}
