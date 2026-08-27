@@ -2,6 +2,8 @@
 
 *Megical* (Medical + Magical) Triage Engine (MTE) is a web application meant to assist with facilitating the medical workflow at community health centers.
 
+<img width="1024" height="576" alt="Short .gif of the triage sheet nurse page" src="https://github.com/user-attachments/assets/b9e44b16-a120-48e9-8cec-ac7fb34f5ed4" />
+
 ## How does it help?
 
 MTE provides an automated workflow for 3 different roles involved in the attendance process, as well as a system admin. It can assist with:
